@@ -1,6 +1,6 @@
 import Rewriter, { IVariables } from './Rewriter';
-import { ASTNode, parseType, VariableDefinitionNode } from 'graphql';
-import { nodesMatch, INodeContext } from '../ast';
+import { ASTNode, parseType, FieldNode, ArgumentNode, VariableNode, TypeNode } from 'graphql';
+import { nodesMatch, INodeAndVarDefs } from '../ast';
 import { identifyFunc } from '../utils';
 
 interface IFieldArgTypeRewriterOpts {
@@ -11,11 +11,15 @@ interface IFieldArgTypeRewriterOpts {
   coerceVariable?: (variable: any) => any;
 }
 
+/**
+ * Rewriter which replaces the type of a single argument of a field
+ * ex: change from id: String! to id: ID!
+ */
 class FieldArgTypeRewriter extends Rewriter {
   protected fieldName: string;
   protected argName: string;
-  protected oldTypeNode: ASTNode;
-  protected newTypeNode: ASTNode;
+  protected oldTypeNode: TypeNode;
+  protected newTypeNode: TypeNode;
   protected coerceVariable: (variable: any) => any;
 
   constructor(options: IFieldArgTypeRewriterOpts) {
@@ -27,37 +31,46 @@ class FieldArgTypeRewriter extends Rewriter {
     this.coerceVariable = options.coerceVariable || identifyFunc;
   }
 
-  matches(node: ASTNode, { parents, variableMap }: INodeContext) {
-    if (parents.length === 0) return false;
-    if (node.kind !== 'VariableDefinition') return false;
-    if (!nodesMatch(node.type, this.oldTypeNode)) return false;
+  matches({ node, variableDefinitions }: INodeAndVarDefs) {
+    // is this a field with the correct fieldName and arguments?
+    if (node.kind !== 'Field') return false;
+    if (node.name.value !== this.fieldName || !node.arguments) return false;
+    // is there an argument with the correct name and type in a variable?
+    const matchingArgument = node.arguments.find(arg => arg.name.value === this.argName);
+    if (!matchingArgument || matchingArgument.value.kind !== 'Variable') return false;
+    const varRef = matchingArgument.value.name.value;
 
-    const argRefs = variableMap[node.variable.name.value];
-    for (const argRef of argRefs) {
-      const argParents = argRef.parents;
-      const argNode = argRef.node;
-      if (argParents.length > 0) {
-        const parent = argParents[0];
-        if (
-          argNode.name.value === this.argName &&
-          parent.kind === 'Field' &&
-          parent.name.value === this.fieldName
-        ) {
-          return true;
-        }
+    // does the referenced variable have the correct type?
+    for (const varDefinition of variableDefinitions) {
+      if (varDefinition.variable.name.value === varRef) {
+        return nodesMatch(this.oldTypeNode, varDefinition.type);
       }
     }
     return false;
   }
 
-  rewriteQueryRequest(node: ASTNode) {
-    return { ...node, type: { ...this.newTypeNode } } as VariableDefinitionNode;
+  rewriteQueryRequest({ node, variableDefinitions }: INodeAndVarDefs) {
+    const varRefName = this.extractMatchingVarRefName(node as FieldNode);
+    const newVarDefs = variableDefinitions.map(varDef => {
+      if (varDef.variable.name.value !== varRefName) return varDef;
+      return { ...varDef, type: this.newTypeNode };
+    });
+    return { node, variableDefinitions: newVarDefs };
   }
 
-  rewriteQueryVariables(node: ASTNode, _ctx: INodeContext, variables: IVariables) {
+  rewriteQueryVariables(
+    { node }: INodeAndVarDefs,
+    _parents: ReadonlyArray<ASTNode>,
+    variables: IVariables
+  ) {
     if (!variables) return variables;
-    const varName = (node as VariableDefinitionNode).variable.name.value;
-    return { ...variables, [varName]: this.coerceVariable(variables[varName]) };
+    const varRefName = this.extractMatchingVarRefName(node as FieldNode);
+    return { ...variables, [varRefName]: this.coerceVariable(variables[varRefName]) };
+  }
+
+  private extractMatchingVarRefName(node: FieldNode) {
+    const matchingArgument = (node.arguments || []).find(arg => arg.name.value === this.argName);
+    return ((matchingArgument as ArgumentNode).value as VariableNode).name.value;
   }
 }
 

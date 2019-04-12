@@ -1,4 +1,4 @@
-import { ASTNode, ArgumentNode } from 'graphql';
+import { ASTNode, ArgumentNode, DocumentNode, VariableDefinitionNode } from 'graphql';
 
 const ignoreKeys = new Set(['loc']);
 
@@ -22,81 +22,80 @@ export const nodesMatch = (node1: ASTNode, node2: ASTNode): boolean => {
   return true;
 };
 
-export interface INodeWithParents {
+export interface INodeAndVarDefs {
   node: ASTNode;
-  parents: ASTNode[];
+  variableDefinitions: ReadonlyArray<VariableDefinitionNode>;
 }
 
 /**
- * Walk the AST add rewrite nodes along the way
+ * Walk the document add rewrite nodes along the way
  * @param doc
  * @param callback Called on each node, and returns a new rewritten node
  */
-export const rewriteAst = (
-  doc: ASTNode,
-  callback: (nodeWithParents: INodeWithParents) => ASTNode
-): ASTNode => {
-  const walkRecursive = (curNodeWithParents: INodeWithParents): ASTNode => {
-    const resultNode = { ...callback(curNodeWithParents) };
-    for (const key of Object.keys(resultNode)) {
+export const rewriteDoc = (
+  doc: DocumentNode,
+  callback: (nodeAndVars: INodeAndVarDefs, parents: ReadonlyArray<ASTNode>) => INodeAndVarDefs
+): DocumentNode => {
+  let variableDefinitions = extractVariableDefinitions(doc);
+  const walkRecursive = (
+    curNodeAndVars: INodeAndVarDefs,
+    curParents: ReadonlyArray<ASTNode>
+  ): ASTNode => {
+    const nextNodeAndVars = callback(curNodeAndVars, curParents);
+    variableDefinitions = nextNodeAndVars.variableDefinitions;
+    const node = nextNodeAndVars.node;
+    const nextParents = [node, ...curParents];
+    for (const key of Object.keys(node)) {
       if (key === 'loc') continue;
-      const val = (resultNode as any)[key];
+      const val = (node as any)[key];
       if (Array.isArray(val)) {
-        (resultNode as any)[key] = val.map(elm => {
+        (node as any)[key] = val.map(elm => {
           if (typeof elm === 'object') {
-            const next: INodeWithParents = {
+            const next: INodeAndVarDefs = {
               node: elm,
-              parents: [curNodeWithParents.node, ...curNodeWithParents.parents]
+              variableDefinitions
             };
-            return walkRecursive(next);
+            return walkRecursive(next, nextParents);
           }
           return elm;
         });
       } else if (typeof val === 'object') {
-        const next: INodeWithParents = {
+        const next: INodeAndVarDefs = {
           node: val,
-          parents: [curNodeWithParents.node, ...curNodeWithParents.parents]
+          variableDefinitions
         };
-        (resultNode as any)[key] = walkRecursive(next);
+        (node as any)[key] = walkRecursive(next, nextParents);
       }
     }
-    return resultNode;
+    return node;
   };
 
-  const root: INodeWithParents = {
+  const root: INodeAndVarDefs = {
     node: doc,
-    parents: []
+    variableDefinitions
   };
-  return walkRecursive(root);
+  const rewrittenDoc = walkRecursive(root, []) as DocumentNode;
+  return replaceVariableDefinitions(rewrittenDoc, variableDefinitions);
 };
 
-export interface IArgumentWithParents extends INodeWithParents {
-  node: ArgumentNode;
-}
-
-export interface IVariableMap {
-  [name: string]: IArgumentWithParents[];
-}
-
-/**
- * return a mapping of variable name => array of argument nodes referencing it
- */
-export const mapVariables = (doc: ASTNode): IVariableMap => {
-  const varMap: IVariableMap = {};
-
-  rewriteAst(doc, nodeWithParents => {
-    const { node } = nodeWithParents;
-    if (node.kind === 'Argument' && node.value.kind === 'Variable') {
-      const variable = node.value;
-      if (!varMap[variable.name.value]) varMap[variable.name.value] = [];
-      varMap[variable.name.value].push(nodeWithParents as IArgumentWithParents);
+const extractVariableDefinitions = (doc: DocumentNode): ReadonlyArray<VariableDefinitionNode> => {
+  for (const def of doc.definitions) {
+    if (def.kind === 'OperationDefinition') {
+      return def.variableDefinitions || [];
     }
-    return nodeWithParents.node;
-  });
-  return varMap;
+  }
+  return [];
 };
 
-export interface INodeContext {
-  parents: ASTNode[];
-  variableMap: IVariableMap;
-}
+const replaceVariableDefinitions = (
+  doc: DocumentNode,
+  variableDefinitions: ReadonlyArray<VariableDefinitionNode>
+): DocumentNode => {
+  const definitions = doc.definitions.map(def => {
+    if (def.kind === 'OperationDefinition') {
+      return { ...def, variableDefinitions };
+    }
+    return def;
+  });
+  return { ...doc, definitions };
+};

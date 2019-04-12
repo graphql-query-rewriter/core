@@ -1,20 +1,27 @@
 import { ASTNode } from 'graphql';
-import { INodeContext } from '../ast';
+import { INodeAndVarDefs } from '../ast';
 
 export type IVariables = { [key: string]: any } | undefined;
 
 abstract class Rewriter {
-  abstract matches(node: ASTNode, ctx: INodeContext): boolean;
+  abstract matches(nodeAndVarDefs: INodeAndVarDefs, parents: ReadonlyArray<ASTNode>): boolean;
 
-  rewriteQueryRequest(node: ASTNode, _ctx: INodeContext): ASTNode {
-    return node;
+  rewriteQueryRequest(
+    nodeAndVarDefs: INodeAndVarDefs,
+    _parents: ReadonlyArray<ASTNode>
+  ): INodeAndVarDefs {
+    return nodeAndVarDefs;
   }
 
-  rewriteQueryVariables(_node: ASTNode, _ctx: INodeContext, variables: IVariables): IVariables {
+  rewriteQueryVariables(
+    _nodeAndVarDefs: INodeAndVarDefs,
+    _parents: ReadonlyArray<ASTNode>,
+    variables: IVariables
+  ): IVariables {
     return variables;
   }
 
-  rewriteQueryResponse(response: any, _node: ASTNode, _ctx: INodeContext): any {
+  rewriteQueryResponse(response: any, _node: ASTNode, _parents: ReadonlyArray<ASTNode>): any {
     return response;
   }
 }

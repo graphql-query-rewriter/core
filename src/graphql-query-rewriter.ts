@@ -1,6 +1,6 @@
 import Rewriter, { IVariables } from './rewriters/Rewriter';
 import { parse, ASTNode, print } from 'graphql';
-import { mapVariables, INodeContext, rewriteAst } from './ast';
+import { rewriteDoc } from './ast';
 
 export const rewriteQueryRequest = (query: string, variables: object, rewriters: Rewriter[]) => {};
 
@@ -9,7 +9,7 @@ export const rewriteQueryResponse = (response: object, rewriters: Rewriter[]) =>
 interface IRewriterMatch {
   rewriter: Rewriter;
   node: ASTNode;
-  context: INodeContext;
+  parents: ReadonlyArray<ASTNode>;
 }
 
 export class GraphqlQueryRewriteHandler {
@@ -26,34 +26,29 @@ export class GraphqlQueryRewriteHandler {
     if (this.hasProcessedRequest) throw new Error('This handler has already rewritten a request');
     this.hasProcessedRequest = true;
     const doc = parse(query);
-    const variableMap = mapVariables(doc);
     let rewrittenVariables = variables;
-    const rewrittenDoc = rewriteAst(doc, ({ node, parents }) => {
-      const context: INodeContext = {
-        parents,
-        variableMap
-      };
-      let rewrittenNode = node;
+    const rewrittenDoc = rewriteDoc(doc, (nodeAndVars, parents) => {
+      let rewrittenNodeAndVars = nodeAndVars;
       const matchingRewriters = this.rewriters.filter(rewriter => {
-        const isMatch = rewriter.matches(rewrittenNode, context);
+        const isMatch = rewriter.matches(nodeAndVars, parents);
         if (isMatch) {
           rewrittenVariables = rewriter.rewriteQueryVariables(
-            rewrittenNode,
-            context,
+            rewrittenNodeAndVars,
+            parents,
             rewrittenVariables
           );
-          rewrittenNode = rewriter.rewriteQueryRequest(rewrittenNode, context);
+          rewrittenNodeAndVars = rewriter.rewriteQueryRequest(rewrittenNodeAndVars, parents);
         }
         return isMatch;
       });
       matchingRewriters.forEach(rewriter => {
         this.matches.push({
           rewriter,
-          node: rewrittenNode,
-          context
+          node: rewrittenNodeAndVars.node,
+          parents
         });
       });
-      return rewrittenNode;
+      return rewrittenNodeAndVars;
     });
 
     return { query: print(rewrittenDoc), variables: rewrittenVariables };
@@ -63,8 +58,8 @@ export class GraphqlQueryRewriteHandler {
     if (this.hasProcessedResponse) throw new Error('This handler has already return a response');
     this.hasProcessedResponse = true;
     let rewrittenResponse = response;
-    this.matches.reverse().forEach(({ rewriter, node, context }) => {
-      rewrittenResponse = rewriter.rewriteQueryResponse(rewrittenResponse, node, context);
+    this.matches.reverse().forEach(({ rewriter, node, parents }) => {
+      rewrittenResponse = rewriter.rewriteQueryResponse(rewrittenResponse, node, parents);
     });
   }
 }
