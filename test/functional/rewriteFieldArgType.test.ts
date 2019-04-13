@@ -2,7 +2,7 @@ import { GraphqlQueryRewriteHandler } from '../../src/graphql-query-rewriter';
 import FieldArgTypeRewriter from '../../src/rewriters/FieldArgTypeRewriter';
 import { gqlFmt } from '../testUtils';
 
-describe('Rewrite field args', () => {
+describe('Rewrite field arg type', () => {
   it('allows rewriting the type of args provided to queries', () => {
     const handler = new GraphqlQueryRewriteHandler([
       new FieldArgTypeRewriter({
