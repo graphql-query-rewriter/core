@@ -21,7 +21,7 @@ abstract class Rewriter {
     return variables;
   }
 
-  rewriteQueryResponse(response: any, _node: ASTNode, _parents: ReadonlyArray<ASTNode>): any {
+  rewriteQueryResponse(response: any): any {
     return response;
   }
 }

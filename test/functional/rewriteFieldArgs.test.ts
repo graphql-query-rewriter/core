@@ -1,7 +1,6 @@
 import { GraphqlQueryRewriteHandler } from '../../src/graphql-query-rewriter';
 import FieldArgTypeRewriter from '../../src/rewriters/FieldArgTypeRewriter';
 import { gqlFmt } from '../testUtils';
-import { coerceValue } from 'graphql';
 
 describe('Rewrite field args', () => {
   it('allows rewriting the type of args provided to queries', () => {

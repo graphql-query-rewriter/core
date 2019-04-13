@@ -1,6 +1,6 @@
 import Rewriter, { IVariables } from './rewriters/Rewriter';
 import { parse, ASTNode, print } from 'graphql';
-import { rewriteDoc } from './ast';
+import { rewriteDoc, extractPath, rewriteResultsAtPath } from './ast';
 
 export const rewriteQueryRequest = (query: string, variables: object, rewriters: Rewriter[]) => {};
 
@@ -8,8 +8,7 @@ export const rewriteQueryResponse = (response: object, rewriters: Rewriter[]) =>
 
 interface IRewriterMatch {
   rewriter: Rewriter;
-  node: ASTNode;
-  parents: ReadonlyArray<ASTNode>;
+  path: ReadonlyArray<string>;
 }
 
 export class GraphqlQueryRewriteHandler {
@@ -29,7 +28,7 @@ export class GraphqlQueryRewriteHandler {
     let rewrittenVariables = variables;
     const rewrittenDoc = rewriteDoc(doc, (nodeAndVars, parents) => {
       let rewrittenNodeAndVars = nodeAndVars;
-      const matchingRewriters = this.rewriters.filter(rewriter => {
+      this.rewriters.forEach(rewriter => {
         const isMatch = rewriter.matches(nodeAndVars, parents);
         if (isMatch) {
           rewrittenVariables = rewriter.rewriteQueryVariables(
@@ -38,15 +37,12 @@ export class GraphqlQueryRewriteHandler {
             rewrittenVariables
           );
           rewrittenNodeAndVars = rewriter.rewriteQueryRequest(rewrittenNodeAndVars, parents);
+          this.matches.push({
+            rewriter,
+            path: extractPath([...parents, rewrittenNodeAndVars.node])
+          });
         }
         return isMatch;
-      });
-      matchingRewriters.forEach(rewriter => {
-        this.matches.push({
-          rewriter,
-          node: rewrittenNodeAndVars.node,
-          parents
-        });
       });
       return rewrittenNodeAndVars;
     });
@@ -55,11 +51,14 @@ export class GraphqlQueryRewriteHandler {
   }
 
   rewriteResponse(response: any) {
-    if (this.hasProcessedResponse) throw new Error('This handler has already return a response');
+    if (this.hasProcessedResponse) throw new Error('This handler has already returned a response');
     this.hasProcessedResponse = true;
     let rewrittenResponse = response;
-    this.matches.reverse().forEach(({ rewriter, node, parents }) => {
-      rewrittenResponse = rewriter.rewriteQueryResponse(rewrittenResponse, node, parents);
+    this.matches.reverse().forEach(({ rewriter, path }) => {
+      rewrittenResponse = rewriteResultsAtPath(rewrittenResponse, path, responseAtPath =>
+        rewriter.rewriteQueryResponse(responseAtPath)
+      );
     });
+    return rewrittenResponse;
   }
 }

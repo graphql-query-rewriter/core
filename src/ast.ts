@@ -99,3 +99,45 @@ const replaceVariableDefinitions = (
   });
   return { ...doc, definitions };
 };
+
+/**
+ * return the path that will be returned in the response from from the chain of parents
+ */
+export const extractPath = (parents: ReadonlyArray<ASTNode>): ReadonlyArray<string> => {
+  const path: string[] = [];
+  parents.forEach(parent => {
+    if (parent.kind === 'Field') {
+      path.push(parent.name.value);
+    }
+  });
+  return path;
+};
+
+type ResultObj = {
+  [key: string]: any;
+};
+
+export const rewriteResultsAtPath = (
+  results: ResultObj,
+  path: ReadonlyArray<string>,
+  callback: (resultsAtPath: any) => any
+): ResultObj => {
+  if (path.length === 0) return callback(results);
+  const curPathElm = path[0];
+  const remainingPath = path.slice(1);
+  const newResults = { ...results };
+  const curResults = results[curPathElm];
+  // if the path stops here, just return results without any rewriting
+  if (curResults === undefined || curResults === null) return results;
+
+  if (Array.isArray(curResults)) {
+    newResults[curPathElm] = curResults.reduce((acc, resultElm) => {
+      const elmResults = rewriteResultsAtPath(resultElm, remainingPath, callback);
+      return acc.concat(elmResults);
+    }, []);
+    return newResults;
+  }
+
+  newResults[curPathElm] = rewriteResultsAtPath(curResults, remainingPath, callback);
+  return newResults;
+};
