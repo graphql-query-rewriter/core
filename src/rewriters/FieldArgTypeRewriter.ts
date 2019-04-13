@@ -1,10 +1,9 @@
-import Rewriter, { IVariables } from './Rewriter';
+import Rewriter, { Variables, RewriterOpts } from './Rewriter';
 import { ASTNode, parseType, FieldNode, ArgumentNode, VariableNode, TypeNode } from 'graphql';
-import { nodesMatch, INodeAndVarDefs } from '../ast';
+import { nodesMatch, NodeAndVarDefs } from '../ast';
 import { identifyFunc } from '../utils';
 
-interface IFieldArgTypeRewriterOpts {
-  fieldName: string;
+interface FieldArgTypeRewriterOpts extends RewriterOpts {
   argName: string;
   oldType: string;
   newType: string;
@@ -16,22 +15,23 @@ interface IFieldArgTypeRewriterOpts {
  * ex: change from id: String! to id: ID!
  */
 class FieldArgTypeRewriter extends Rewriter {
-  protected fieldName: string;
   protected argName: string;
   protected oldTypeNode: TypeNode;
   protected newTypeNode: TypeNode;
   protected coerceVariable: (variable: any) => any;
 
-  constructor(options: IFieldArgTypeRewriterOpts) {
-    super();
-    this.fieldName = options.fieldName;
+  constructor(options: FieldArgTypeRewriterOpts) {
+    super(options);
     this.argName = options.argName;
     this.oldTypeNode = parseType(options.oldType);
     this.newTypeNode = parseType(options.newType);
     this.coerceVariable = options.coerceVariable || identifyFunc;
   }
 
-  matches({ node, variableDefinitions }: INodeAndVarDefs) {
+  matches(nodeAndVars: NodeAndVarDefs, parents: ASTNode[]) {
+    if (!super.matches(nodeAndVars, parents)) return false;
+    const node = nodeAndVars.node as FieldNode;
+    const { variableDefinitions } = nodeAndVars;
     // is this a field with the correct fieldName and arguments?
     if (node.kind !== 'Field') return false;
     if (node.name.value !== this.fieldName || !node.arguments) return false;
@@ -49,7 +49,7 @@ class FieldArgTypeRewriter extends Rewriter {
     return false;
   }
 
-  rewriteQueryRequest({ node, variableDefinitions }: INodeAndVarDefs) {
+  rewriteQuery({ node, variableDefinitions }: NodeAndVarDefs) {
     const varRefName = this.extractMatchingVarRefName(node as FieldNode);
     const newVarDefs = variableDefinitions.map(varDef => {
       if (varDef.variable.name.value !== varRefName) return varDef;
@@ -58,11 +58,7 @@ class FieldArgTypeRewriter extends Rewriter {
     return { node, variableDefinitions: newVarDefs };
   }
 
-  rewriteQueryVariables(
-    { node }: INodeAndVarDefs,
-    _parents: ReadonlyArray<ASTNode>,
-    variables: IVariables
-  ) {
+  rewriteVariables({ node }: NodeAndVarDefs, variables: Variables) {
     if (!variables) return variables;
     const varRefName = this.extractMatchingVarRefName(node as FieldNode);
     return { ...variables, [varRefName]: this.coerceVariable(variables[varRefName]) };

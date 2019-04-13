@@ -1,10 +1,6 @@
-import Rewriter, { IVariables } from './rewriters/Rewriter';
-import { parse, ASTNode, print } from 'graphql';
+import Rewriter, { Variables } from './rewriters/Rewriter';
+import { parse, print } from 'graphql';
 import { rewriteDoc, extractPath, rewriteResultsAtPath } from './ast';
-
-export const rewriteQueryRequest = (query: string, variables: object, rewriters: Rewriter[]) => {};
-
-export const rewriteQueryResponse = (response: object, rewriters: Rewriter[]) => {};
 
 interface IRewriterMatch {
   rewriter: Rewriter;
@@ -21,7 +17,7 @@ export class GraphqlQueryRewriteHandler {
     this.rewriters = rewriters;
   }
 
-  rewriteRequest(query: string, variables?: IVariables) {
+  rewriteRequest(query: string, variables?: Variables) {
     if (this.hasProcessedRequest) throw new Error('This handler has already rewritten a request');
     this.hasProcessedRequest = true;
     const doc = parse(query);
@@ -31,12 +27,8 @@ export class GraphqlQueryRewriteHandler {
       this.rewriters.forEach(rewriter => {
         const isMatch = rewriter.matches(nodeAndVars, parents);
         if (isMatch) {
-          rewrittenVariables = rewriter.rewriteQueryVariables(
-            rewrittenNodeAndVars,
-            parents,
-            rewrittenVariables
-          );
-          rewrittenNodeAndVars = rewriter.rewriteQueryRequest(rewrittenNodeAndVars, parents);
+          rewrittenVariables = rewriter.rewriteVariables(rewrittenNodeAndVars, rewrittenVariables);
+          rewrittenNodeAndVars = rewriter.rewriteQuery(rewrittenNodeAndVars);
           this.matches.push({
             rewriter,
             path: extractPath([...parents, rewrittenNodeAndVars.node])
@@ -56,7 +48,7 @@ export class GraphqlQueryRewriteHandler {
     let rewrittenResponse = response;
     this.matches.reverse().forEach(({ rewriter, path }) => {
       rewrittenResponse = rewriteResultsAtPath(rewrittenResponse, path, responseAtPath =>
-        rewriter.rewriteQueryResponse(responseAtPath)
+        rewriter.rewriteResponse(responseAtPath)
       );
     });
     return rewrittenResponse;

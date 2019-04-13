@@ -1,9 +1,8 @@
-import Rewriter, { IVariables } from './Rewriter';
-import { FieldNode, ArgumentNode, ObjectFieldNode, SelectionNode } from 'graphql';
-import { INodeAndVarDefs } from '../ast';
+import Rewriter, { RewriterOpts } from './Rewriter';
+import { FieldNode, ASTNode } from 'graphql';
+import { NodeAndVarDefs } from '../ast';
 
-interface INestFieldOutputsRewriterOpts {
-  fieldName: string;
+interface NestFieldOutputsRewriterOpts extends RewriterOpts {
   newOutputName: string;
   outputsToNest: string[];
 }
@@ -13,21 +12,20 @@ interface INestFieldOutputsRewriterOpts {
  * ex: change from `field { output1, output2 }` to `field { nestedOutputs { output1, output 2 } }`
  */
 class NestFieldOutputsRewriter extends Rewriter {
-  protected fieldName: string;
   protected newOutputName: string;
   protected outputsToNest: string[];
 
-  constructor(options: INestFieldOutputsRewriterOpts) {
-    super();
-    this.fieldName = options.fieldName;
+  constructor(options: NestFieldOutputsRewriterOpts) {
+    super(options);
     this.newOutputName = options.newOutputName;
     this.outputsToNest = options.outputsToNest;
   }
 
-  matches({ node }: INodeAndVarDefs) {
-    // is this a field with the correct fieldName and selections?
-    if (node.kind !== 'Field') return false;
-    if (node.name.value !== this.fieldName || !node.selectionSet) return false;
+  matches(nodeAndVars: NodeAndVarDefs, parents: ASTNode[]) {
+    if (!super.matches(nodeAndVars, parents)) return false;
+    const node = nodeAndVars.node as FieldNode;
+    // is this a field with the correct selections?
+    if (!node.selectionSet) return false;
     // if `newOutputName` already exists as an output, skip it
     if (
       node.selectionSet.selections.find(
@@ -42,7 +40,7 @@ class NestFieldOutputsRewriter extends Rewriter {
     );
   }
 
-  rewriteQueryRequest(nodeAndVarDefs: INodeAndVarDefs) {
+  rewriteQuery(nodeAndVarDefs: NodeAndVarDefs) {
     const node = nodeAndVarDefs.node as FieldNode;
     const { variableDefinitions } = nodeAndVarDefs;
     if (!node.selectionSet) return nodeAndVarDefs;
@@ -64,10 +62,10 @@ class NestFieldOutputsRewriter extends Rewriter {
     return {
       node: { ...node, selectionSet: { ...node.selectionSet, selections: newOutputs } },
       variableDefinitions
-    } as INodeAndVarDefs;
+    } as NodeAndVarDefs;
   }
 
-  rewriteQueryResponse(response: any) {
+  rewriteResponse(response: any) {
     if (typeof response === 'object') {
       // undo the nesting in the response so it matches the original query
       if (response[this.newOutputName] && typeof response[this.newOutputName] === 'object') {

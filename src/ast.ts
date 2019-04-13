@@ -22,7 +22,7 @@ export const nodesMatch = (node1: ASTNode, node2: ASTNode): boolean => {
   return true;
 };
 
-export interface INodeAndVarDefs {
+export interface NodeAndVarDefs {
   node: ASTNode;
   variableDefinitions: ReadonlyArray<VariableDefinitionNode>;
 }
@@ -34,11 +34,11 @@ export interface INodeAndVarDefs {
  */
 export const rewriteDoc = (
   doc: DocumentNode,
-  callback: (nodeAndVars: INodeAndVarDefs, parents: ReadonlyArray<ASTNode>) => INodeAndVarDefs
+  callback: (nodeAndVars: NodeAndVarDefs, parents: ReadonlyArray<ASTNode>) => NodeAndVarDefs
 ): DocumentNode => {
   let variableDefinitions = extractVariableDefinitions(doc);
   const walkRecursive = (
-    curNodeAndVars: INodeAndVarDefs,
+    curNodeAndVars: NodeAndVarDefs,
     curParents: ReadonlyArray<ASTNode>
   ): ASTNode => {
     const nextNodeAndVars = callback(curNodeAndVars, curParents);
@@ -51,7 +51,7 @@ export const rewriteDoc = (
       if (Array.isArray(val)) {
         (node as any)[key] = val.map(elm => {
           if (typeof elm === 'object') {
-            const next: INodeAndVarDefs = {
+            const next: NodeAndVarDefs = {
               node: elm,
               variableDefinitions
             };
@@ -60,7 +60,7 @@ export const rewriteDoc = (
           return elm;
         });
       } else if (typeof val === 'object') {
-        const next: INodeAndVarDefs = {
+        const next: NodeAndVarDefs = {
           node: val,
           variableDefinitions
         };
@@ -70,7 +70,7 @@ export const rewriteDoc = (
     return node;
   };
 
-  const root: INodeAndVarDefs = {
+  const root: NodeAndVarDefs = {
     node: doc,
     variableDefinitions
   };
