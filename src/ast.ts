@@ -78,7 +78,9 @@ export const rewriteDoc = (
   return replaceVariableDefinitions(rewrittenDoc, variableDefinitions);
 };
 
-const extractVariableDefinitions = (doc: DocumentNode): ReadonlyArray<VariableDefinitionNode> => {
+export const extractVariableDefinitions = (
+  doc: DocumentNode
+): ReadonlyArray<VariableDefinitionNode> => {
   for (const def of doc.definitions) {
     if (def.kind === 'OperationDefinition') {
       return def.variableDefinitions || [];
@@ -87,7 +89,7 @@ const extractVariableDefinitions = (doc: DocumentNode): ReadonlyArray<VariableDe
   return [];
 };
 
-const replaceVariableDefinitions = (
+export const replaceVariableDefinitions = (
   doc: DocumentNode,
   variableDefinitions: ReadonlyArray<VariableDefinitionNode>
 ): DocumentNode => {

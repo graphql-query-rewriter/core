@@ -43,6 +43,25 @@ describe('Rewrite field arg type', () => {
       query: expectedRewritenQuery,
       variables: undefined
     });
+    const response = {
+      things: {
+        cat: 'meh',
+        dog: [
+          {
+            catDog: '123'
+          }
+        ]
+      },
+      otherThing: {
+        otherThingField: 18
+      }
+    };
+    // shouldn't modify the response
+    expect(handler.rewriteResponse(response)).toEqual(response);
+
+    // shouldn't allow calling rewrite multiple times
+    expect(() => handler.rewriteRequest(query)).toThrow();
+    expect(() => handler.rewriteResponse(response)).toThrow();
   });
 
   it('can be passed a coerceVariable function to change variable values', () => {

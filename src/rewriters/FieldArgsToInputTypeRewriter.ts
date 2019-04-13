@@ -1,15 +1,6 @@
-import Rewriter, { IVariables } from './Rewriter';
-import {
-  ASTNode,
-  parseType,
-  FieldNode,
-  ArgumentNode,
-  VariableNode,
-  TypeNode,
-  ObjectFieldNode
-} from 'graphql';
-import { nodesMatch, INodeAndVarDefs } from '../ast';
-import { identifyFunc } from '../utils';
+import Rewriter from './Rewriter';
+import { FieldNode, ArgumentNode, ObjectFieldNode } from 'graphql';
+import { INodeAndVarDefs } from '../ast';
 
 interface IFieldArgsToInputTypeRewriterOpts {
   fieldName: string;
