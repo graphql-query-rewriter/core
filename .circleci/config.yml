@@ -1,0 +1,37 @@
+version: 2
+
+.restore-cache: &restore_cache
+  restore_cache:
+    name: Restoring Node Modules Cache
+    keys:
+      - v1-node_modules-{{ checksum "yarn.lock" }}
+      # fallback to using the latest cache if no exact match is found
+      - v1-node_modules-
+
+jobs:
+  build:
+    docker:
+      - image: circleci/node:10
+
+    working_directory: ~/repo
+
+    branches:
+      ignore:
+        - /^v\d+\.\d+\.\d+$/
+
+    steps:
+      - checkout
+      - <<: *restore_cache
+      - run: yarn install
+
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package.json" }}
+
+      - run: yarn lint
+      - run: yarn build
+      - run: yarn test
+      - run: yarn report-coverage
+      - run: if [ "$CIRCLE_BRANCH" = "master" ]; then yarn deploy-docs; fi
+      - run: if [ "$CIRCLE_BRANCH" = "master" ]; then yarn semantic-release; fi
