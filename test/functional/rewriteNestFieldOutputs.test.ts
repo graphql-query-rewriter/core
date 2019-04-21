@@ -1,10 +1,10 @@
-import { GraphqlQueryRewriteHandler } from '../../src/graphql-query-rewriter';
+import RewriteHandler from '../../src/RewriteHandler';
 import NestFieldOutputsRewriter from '../../src/rewriters/NestFieldOutputsRewriter';
 import { gqlFmt } from '../testUtils';
 
 describe('Rewrite field args to input type', () => {
   it('allows nesting the args provided into an input type', () => {
-    const handler = new GraphqlQueryRewriteHandler([
+    const handler = new RewriteHandler([
       new NestFieldOutputsRewriter({
         fieldName: 'createCat',
         newOutputName: 'cat',
@@ -56,7 +56,7 @@ describe('Rewrite field args to input type', () => {
   });
 
   it("ignores outputs that aren't in the `outputsToNest` list", () => {
-    const handler = new GraphqlQueryRewriteHandler([
+    const handler = new RewriteHandler([
       new NestFieldOutputsRewriter({
         fieldName: 'createCat',
         newOutputName: 'cat',

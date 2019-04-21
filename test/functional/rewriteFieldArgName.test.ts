@@ -1,10 +1,10 @@
-import { GraphqlQueryRewriteHandler } from '../../src/graphql-query-rewriter';
+import RewriteHandler from '../../src/RewriteHandler';
 import FieldArgNameRewriter from '../../src/rewriters/FieldArgNameRewriter';
 import { gqlFmt } from '../testUtils';
 
 describe('Rewrite field arg name', () => {
   it('allows rewriting the name of args provided to queries', () => {
-    const handler = new GraphqlQueryRewriteHandler([
+    const handler = new RewriteHandler([
       new FieldArgNameRewriter({
         fieldName: 'things',
         oldArgName: 'otherThingID',
@@ -45,7 +45,7 @@ describe('Rewrite field arg name', () => {
   });
 
   it('works with non-parameterized queries too', () => {
-    const handler = new GraphqlQueryRewriteHandler([
+    const handler = new RewriteHandler([
       new FieldArgNameRewriter({
         fieldName: 'things',
         oldArgName: 'otherThingID',

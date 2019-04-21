@@ -2,14 +2,14 @@ import Rewriter, { Variables } from './rewriters/Rewriter';
 import { parse, print } from 'graphql';
 import { rewriteDoc, extractPath, rewriteResultsAtPath } from './ast';
 
-interface IRewriterMatch {
+interface RewriterMatch {
   rewriter: Rewriter;
   path: ReadonlyArray<string>;
 }
 
-export class GraphqlQueryRewriteHandler {
+export default class RewriteHandler {
   private rewriters: Rewriter[];
-  private matches: IRewriterMatch[] = [];
+  private matches: RewriterMatch[] = [];
   private hasProcessedRequest: boolean = false;
   private hasProcessedResponse: boolean = false;
 

@@ -1,10 +1,10 @@
-import { GraphqlQueryRewriteHandler } from '../../src/graphql-query-rewriter';
+import RewriteHandler from '../../src/RewriteHandler';
 import FieldArgsToInputTypeRewriter from '../../src/rewriters/FieldArgsToInputTypeRewriter';
 import { gqlFmt } from '../testUtils';
 
 describe('Rewrite field args to input type', () => {
   it('allows nesting the args provided into an input type', () => {
-    const handler = new GraphqlQueryRewriteHandler([
+    const handler = new RewriteHandler([
       new FieldArgsToInputTypeRewriter({
         fieldName: 'things',
         argNames: ['arg1', 'arg2']
@@ -32,7 +32,7 @@ describe('Rewrite field args to input type', () => {
   });
 
   it('only nests the args listed, and leaves the others alone', () => {
-    const handler = new GraphqlQueryRewriteHandler([
+    const handler = new RewriteHandler([
       new FieldArgsToInputTypeRewriter({
         fieldName: 'things',
         argNames: ['arg1', 'arg2']
@@ -60,7 +60,7 @@ describe('Rewrite field args to input type', () => {
   });
 
   it('allows setting a custom input field name instead of "input"', () => {
-    const handler = new GraphqlQueryRewriteHandler([
+    const handler = new RewriteHandler([
       new FieldArgsToInputTypeRewriter({
         fieldName: 'things',
         inputArgName: 'submission',
@@ -89,7 +89,7 @@ describe('Rewrite field args to input type', () => {
   });
 
   it('leaves fields alone if there is already an existing input argument', () => {
-    const handler = new GraphqlQueryRewriteHandler([
+    const handler = new RewriteHandler([
       new FieldArgsToInputTypeRewriter({
         fieldName: 'things',
         argNames: ['arg1', 'arg2']
