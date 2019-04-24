@@ -1,6 +1,6 @@
-import Rewriter, { RewriterOpts } from './Rewriter';
-import { FieldNode, ArgumentNode, ObjectFieldNode, ASTNode } from 'graphql';
+import { ArgumentNode, ASTNode, FieldNode, ObjectFieldNode } from 'graphql';
 import { NodeAndVarDefs } from '../ast';
+import Rewriter, { RewriterOpts } from './Rewriter';
 
 interface FieldArgsToInputTypeRewriterOpts extends RewriterOpts {
   argNames: string[];
@@ -22,7 +22,7 @@ class FieldArgsToInputTypeRewriter extends Rewriter {
     if (options.inputArgName) this.inputArgName = options.inputArgName;
   }
 
-  matches(nodeAndVars: NodeAndVarDefs, parents: ASTNode[]) {
+  public matches(nodeAndVars: NodeAndVarDefs, parents: ASTNode[]) {
     if (!super.matches(nodeAndVars, parents)) return false;
     const node = nodeAndVars.node as FieldNode;
     // is this a field with the correct fieldName and arguments?
@@ -35,7 +35,7 @@ class FieldArgsToInputTypeRewriter extends Rewriter {
     return !!node.arguments.find(arg => this.argNames.indexOf(arg.name.value) >= 0);
   }
 
-  rewriteQuery({ node, variableDefinitions }: NodeAndVarDefs) {
+  public rewriteQuery({ node, variableDefinitions }: NodeAndVarDefs) {
     const argsToNest = ((node as FieldNode).arguments || []).filter(
       argument => this.argNames.indexOf(argument.name.value) >= 0
     );
@@ -57,7 +57,7 @@ class FieldArgsToInputTypeRewriter extends Rewriter {
       }
     };
     newArguments.push(inputArgument);
-    return { node: { ...node, arguments: newArguments }, variableDefinitions } as NodeAndVarDefs;
+    return { variableDefinitions, node: { ...node, arguments: newArguments } } as NodeAndVarDefs;
   }
 }
 

@@ -18,7 +18,7 @@ abstract class Rewriter {
     if (rootTypes) this.rootTypes = rootTypes;
   }
 
-  matches({ node }: NodeAndVarDefs, parents: ReadonlyArray<ASTNode>): boolean {
+  public matches({ node }: NodeAndVarDefs, parents: ReadonlyArray<ASTNode>): boolean {
     if (node.kind !== 'Field' || node.name.value !== this.fieldName) return false;
     const root = parents[0];
     if (
@@ -33,15 +33,15 @@ abstract class Rewriter {
     return true;
   }
 
-  rewriteQuery(nodeAndVarDefs: NodeAndVarDefs): NodeAndVarDefs {
+  public rewriteQuery(nodeAndVarDefs: NodeAndVarDefs): NodeAndVarDefs {
     return nodeAndVarDefs;
   }
 
-  rewriteVariables(_nodeAndVarDefs: NodeAndVarDefs, variables: Variables): Variables {
+  public rewriteVariables(nodeAndVarDefs: NodeAndVarDefs, variables: Variables): Variables {
     return variables;
   }
 
-  rewriteResponse(response: any): any {
+  public rewriteResponse(response: any): any {
     return response;
   }
 }

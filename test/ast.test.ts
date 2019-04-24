@@ -1,10 +1,10 @@
+import { OperationDefinitionNode, parse } from 'graphql';
 import {
-  rewriteResultsAtPath,
-  nodesMatch,
   extractVariableDefinitions,
-  replaceVariableDefinitions
+  nodesMatch,
+  replaceVariableDefinitions,
+  rewriteResultsAtPath
 } from '../src/ast';
-import { parse, OperationDefinitionNode } from 'graphql';
 
 describe('ast utils', () => {
   describe('rewriteResultsAtPath', () => {

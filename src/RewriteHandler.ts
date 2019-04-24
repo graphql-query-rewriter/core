@@ -1,6 +1,6 @@
-import Rewriter, { Variables } from './rewriters/Rewriter';
 import { parse, print } from 'graphql';
-import { rewriteDoc, extractPath, rewriteResultsAtPath } from './ast';
+import { extractPath, rewriteDoc, rewriteResultsAtPath } from './ast';
+import Rewriter, { Variables } from './rewriters/Rewriter';
 
 interface RewriterMatch {
   rewriter: Rewriter;
@@ -17,7 +17,7 @@ export default class RewriteHandler {
     this.rewriters = rewriters;
   }
 
-  rewriteRequest(query: string, variables?: Variables) {
+  public rewriteRequest(query: string, variables?: Variables) {
     if (this.hasProcessedRequest) throw new Error('This handler has already rewritten a request');
     this.hasProcessedRequest = true;
     const doc = parse(query);
@@ -42,7 +42,7 @@ export default class RewriteHandler {
     return { query: print(rewrittenDoc), variables: rewrittenVariables };
   }
 
-  rewriteResponse(response: any) {
+  public rewriteResponse(response: any) {
     if (this.hasProcessedResponse) throw new Error('This handler has already returned a response');
     this.hasProcessedResponse = true;
     let rewrittenResponse = response;

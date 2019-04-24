@@ -1,6 +1,6 @@
-import Rewriter, { RewriterOpts } from './Rewriter';
-import { FieldNode, ASTNode } from 'graphql';
+import { ASTNode, FieldNode } from 'graphql';
 import { NodeAndVarDefs } from '../ast';
+import Rewriter, { RewriterOpts } from './Rewriter';
 
 interface NestFieldOutputsRewriterOpts extends RewriterOpts {
   newOutputName: string;
@@ -21,7 +21,7 @@ class NestFieldOutputsRewriter extends Rewriter {
     this.outputsToNest = options.outputsToNest;
   }
 
-  matches(nodeAndVars: NodeAndVarDefs, parents: ASTNode[]) {
+  public matches(nodeAndVars: NodeAndVarDefs, parents: ASTNode[]) {
     if (!super.matches(nodeAndVars, parents)) return false;
     const node = nodeAndVars.node as FieldNode;
     // is this a field with the correct selections?
@@ -40,7 +40,7 @@ class NestFieldOutputsRewriter extends Rewriter {
     );
   }
 
-  rewriteQuery(nodeAndVarDefs: NodeAndVarDefs) {
+  public rewriteQuery(nodeAndVarDefs: NodeAndVarDefs) {
     const node = nodeAndVarDefs.node as FieldNode;
     const { variableDefinitions } = nodeAndVarDefs;
     if (!node.selectionSet) return nodeAndVarDefs;
@@ -60,12 +60,12 @@ class NestFieldOutputsRewriter extends Rewriter {
     };
     newOutputs.push(nestedOutput);
     return {
-      node: { ...node, selectionSet: { ...node.selectionSet, selections: newOutputs } },
-      variableDefinitions
+      variableDefinitions,
+      node: { ...node, selectionSet: { ...node.selectionSet, selections: newOutputs } }
     } as NodeAndVarDefs;
   }
 
-  rewriteResponse(response: any) {
+  public rewriteResponse(response: any) {
     if (typeof response === 'object') {
       // undo the nesting in the response so it matches the original query
       if (response[this.newOutputName] && typeof response[this.newOutputName] === 'object') {

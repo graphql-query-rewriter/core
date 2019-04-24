@@ -1,7 +1,7 @@
-import Rewriter, { Variables, RewriterOpts } from './Rewriter';
-import { ASTNode, parseType, FieldNode, ArgumentNode, VariableNode, TypeNode } from 'graphql';
-import { nodesMatch, NodeAndVarDefs } from '../ast';
+import { ArgumentNode, ASTNode, FieldNode, parseType, TypeNode, VariableNode } from 'graphql';
+import { NodeAndVarDefs, nodesMatch } from '../ast';
 import { identifyFunc } from '../utils';
+import Rewriter, { RewriterOpts, Variables } from './Rewriter';
 
 interface FieldArgTypeRewriterOpts extends RewriterOpts {
   argName: string;
@@ -28,7 +28,7 @@ class FieldArgTypeRewriter extends Rewriter {
     this.coerceVariable = options.coerceVariable || identifyFunc;
   }
 
-  matches(nodeAndVars: NodeAndVarDefs, parents: ASTNode[]) {
+  public matches(nodeAndVars: NodeAndVarDefs, parents: ASTNode[]) {
     if (!super.matches(nodeAndVars, parents)) return false;
     const node = nodeAndVars.node as FieldNode;
     const { variableDefinitions } = nodeAndVars;
@@ -49,7 +49,7 @@ class FieldArgTypeRewriter extends Rewriter {
     return false;
   }
 
-  rewriteQuery({ node, variableDefinitions }: NodeAndVarDefs) {
+  public rewriteQuery({ node, variableDefinitions }: NodeAndVarDefs) {
     const varRefName = this.extractMatchingVarRefName(node as FieldNode);
     const newVarDefs = variableDefinitions.map(varDef => {
       if (varDef.variable.name.value !== varRefName) return varDef;
@@ -58,7 +58,7 @@ class FieldArgTypeRewriter extends Rewriter {
     return { node, variableDefinitions: newVarDefs };
   }
 
-  rewriteVariables({ node }: NodeAndVarDefs, variables: Variables) {
+  public rewriteVariables({ node }: NodeAndVarDefs, variables: Variables) {
     if (!variables) return variables;
     const varRefName = this.extractMatchingVarRefName(node as FieldNode);
     return { ...variables, [varRefName]: this.coerceVariable(variables[varRefName]) };

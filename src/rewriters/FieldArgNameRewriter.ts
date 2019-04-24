@@ -1,6 +1,6 @@
-import Rewriter, { RewriterOpts } from './Rewriter';
-import { FieldNode, ASTNode } from 'graphql';
+import { ASTNode, FieldNode } from 'graphql';
 import { NodeAndVarDefs } from '../ast';
+import Rewriter, { RewriterOpts } from './Rewriter';
 
 interface IFieldArgNameRewriterOpts extends RewriterOpts {
   oldArgName: string;
@@ -21,7 +21,7 @@ class FieldArgNameRewriter extends Rewriter {
     this.newArgName = options.newArgName;
   }
 
-  matches(nodeAndVars: NodeAndVarDefs, parents: ASTNode[]) {
+  public matches(nodeAndVars: NodeAndVarDefs, parents: ASTNode[]) {
     if (!super.matches(nodeAndVars, parents)) return false;
     const node = nodeAndVars.node as FieldNode;
     // is this a field with the correct arguments?
@@ -30,14 +30,14 @@ class FieldArgNameRewriter extends Rewriter {
     return !!node.arguments.find(arg => arg.name.value === this.oldArgName);
   }
 
-  rewriteQuery({ node, variableDefinitions }: NodeAndVarDefs) {
+  public rewriteQuery({ node, variableDefinitions }: NodeAndVarDefs) {
     const newArguments = ((node as FieldNode).arguments || []).map(argument => {
       if (argument.name.value === this.oldArgName) {
         return { ...argument, name: { ...argument.name, value: this.newArgName } };
       }
       return argument;
     });
-    return { node: { ...node, arguments: newArguments }, variableDefinitions } as NodeAndVarDefs;
+    return { variableDefinitions, node: { ...node, arguments: newArguments } } as NodeAndVarDefs;
   }
 }
 

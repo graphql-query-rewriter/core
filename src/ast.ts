@@ -1,4 +1,4 @@
-import { ASTNode, ArgumentNode, DocumentNode, VariableDefinitionNode } from 'graphql';
+import { ASTNode, DocumentNode, VariableDefinitionNode } from 'graphql';
 
 const ignoreKeys = new Set(['loc']);
 
@@ -52,8 +52,8 @@ export const rewriteDoc = (
         (node as any)[key] = val.map(elm => {
           if (typeof elm === 'object') {
             const next: NodeAndVarDefs = {
-              node: elm,
-              variableDefinitions
+              variableDefinitions,
+              node: elm
             };
             return walkRecursive(next, nextParents);
           }
@@ -61,8 +61,8 @@ export const rewriteDoc = (
         });
       } else if (typeof val === 'object') {
         const next: NodeAndVarDefs = {
-          node: val,
-          variableDefinitions
+          variableDefinitions,
+          node: val
         };
         (node as any)[key] = walkRecursive(next, nextParents);
       }
@@ -71,8 +71,8 @@ export const rewriteDoc = (
   };
 
   const root: NodeAndVarDefs = {
-    node: doc,
-    variableDefinitions
+    variableDefinitions,
+    node: doc
   };
   const rewrittenDoc = walkRecursive(root, []) as DocumentNode;
   return replaceVariableDefinitions(rewrittenDoc, variableDefinitions);
@@ -115,9 +115,9 @@ export const extractPath = (parents: ReadonlyArray<ASTNode>): ReadonlyArray<stri
   return path;
 };
 
-type ResultObj = {
+interface ResultObj {
   [key: string]: any;
-};
+}
 
 export const rewriteResultsAtPath = (
   results: ResultObj,
