@@ -62,7 +62,7 @@ query getUserById($id: String!) {
 }
 ```
 
-It will be rewritten before it gets process to:
+It will be rewritten before it gets processed to:
 ```
 query getUserById($id: ID!) {
   userById(id: $id) {
