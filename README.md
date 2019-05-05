@@ -24,3 +24,60 @@ Wouldn't it be great if you could change the schema to use `ID!`, but just silen
 
 GraphQL Query Rewriter provides a way to rewrite deprecated queries in middleware so they'll conform to your new schema without needing to sully your API with gross names and deprecated fields like `doTheThingNew` or `doTheThingV3`.
 
+In the above example, we can set up a rewrite rule so that `userById(id: String!)` will be seamlessly rewritten to `userById(id: ID!)` using the following middleware (assuming express-graphql):
+
+```javascript
+
+import { FieldArgTypeRewriter } from 'graphql-query-rewriter';
+import { graphqlRewriterMiddleware } from 'express-graphql-query-rewriter';
+
+const app = express();
+
+// set up graphqlRewriterMiddleware right before graphQL gets processed
+// to rewrite deprecated queries so they seamlessly work with your new schema
+app.use('/graphql', graphqlRewriterMiddleware({
+  rewriters: [
+    new FieldArgTypeRewriter({
+      fieldName: 'userById',
+      argName: 'id',
+      oldType: 'String!',
+      newType: 'ID!'
+    }),
+  ]
+}));
+
+app.use('/graphql', graphqlHTTP( ... ));
+
+...
+```
+
+Now, when old clients send the following query:
+```
+query getUserById($id: String!) {
+  userById(id: $id) {
+    ...
+  }
+}
+```
+
+It will be rewritten before it gets process to:
+```
+query getUserById($id: ID!) {
+  userById(id: $id) {
+    ...
+  }
+}
+```
+
+Now your schema is clean and up to date, and deprecated clients keep working! GraphQL Schema Rewriter can rewrite much more complex queries than just changing a single input type as well.
+
+
+## Installation
+
+Installation requires the base package `graphql-query-rewriter` and a middleware adapter for the web framework you use. Currently only `graphql-express` is supported, but `apollo-server` and more will be added soon!
+
+```
+# for express-graphql
+npm install graphql-query-rewriter express-graphql-query-rewriter
+```
+
