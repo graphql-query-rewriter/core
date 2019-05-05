@@ -22,7 +22,9 @@ Oh no! We should have used `ID!` as the type for `userById(id)` instead of `Stri
 
 Wouldn't it be great if you could change the schema to use `ID!`, but just silently replace `String!` in old queries with `ID!` in your middleware so the old queries will continue to work just like they had been?
 
-GraphQL Query Rewriter provides a way to rewrite deprecated queries in middleware so they'll conform to your new schema without needing to sully your API with gross names and deprecated fields like `doTheThingNew` or `doTheThingV3`.
+## Rewrite it!
+
+GraphQL Query Rewriter provides a way to rewrite deprecated queries in middleware so they'll conform to your new schema without needing to sully your API with awkwardly renamed and deprecated fields like `doTheThingNew` or `doTheThingV3`.
 
 In the above example, we can set up a rewrite rule so that `userById(id: String!)` will be seamlessly rewritten to `userById(id: ID!)` using the following middleware (assuming express-graphql):
 
