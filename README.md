@@ -114,7 +114,7 @@ const rewriter = new FieldArgTypeRewriter({
 })
 ```
 
-Sometimes, you'll need to do some preprocessing on the variables submitted to the to this argument to make them into the type needed by the new schema. You can do this by passing in a `coerceVariable` function which returns a new value of the variable. For example, the following changes the value of `arg1` from `Int!` to  `String!`, and also changes the value of `arg1` to a string as well:
+Sometimes, you'll need to do some preprocessing on the variables submitted to the rewritten argument to make them into the type needed by the new schema. You can do this by passing in a `coerceVariable` function which returns a new value of the variable. For example, the following changes the value of `arg1` from `Int!` to  `String!`, and also changes the value of `arg1` to a string as well:
 
 ```js
 import { FieldArgTypeRewriter } from 'graphql-query-rewriter';
@@ -246,3 +246,21 @@ mutation createUser(input: CreateUserInput!) {
 ## Current Limitations
 
 Currently GraphQL Query Rewriter can only work with a single operation per query, and cannot properly handle aliased fields. These limitations should hopefully be fixed soon. Contributions are welcome!
+
+## License
+
+GraphQL Query Rewriter is released under a [MIT License](https://opensource.org/licenses/MIT).
+
+## Contributing
+
+Contributions are welcome! These steps will guide you through contributing to this project:
+
+- Fork the repo
+- Clone it and install dependencies
+
+  git clone https://github.com/chanind/graphql-query-rewriter
+  yarn install
+
+Make and commit your changes. Make sure the commands yarn run build and yarn run test:prod are working.
+
+Finally send a [GitHub Pull Request](https://github.com/chanind/graphql-query-rewriter/compare?expand=1) with a clear list of what you've done. Make sure all of your commits are atomic (one feature per commit). Please add tests for any features that you add or change.
