@@ -100,7 +100,7 @@ app.use('/graphql', graphqlHTTP( ... ));
 
 ### FieldArgTypeRewriter
 
-The `FieldArgTypeRewriter` rewrites the type of an argument to a graphQL query or mutation. For example, to change from `Int` to `Int!` in a mutation called `doTheThing(arg1: Int)` you could add the following:
+`FieldArgTypeRewriter` rewrites the type of an argument to a graphQL query or mutation. For example, to change from `Int` to `Int!` in a mutation called `doTheThing(arg1: Int)` you could add the following:
 
 ```js
 import { FieldArgTypeRewriter } from 'graphql-query-rewriter';
@@ -131,7 +131,7 @@ const rewriter = new FieldArgTypeRewriter({
 
 ### FieldArgNameRewriter
 
-The `FieldArgNameRewriter` rewrites the name of an argument to a graphQL query or mutation. For example, to change an argument name from `userID` to `userId` in a mutation called `createUser(userID: ID!)` you could add the following:
+`FieldArgNameRewriter` rewrites the name of an argument to a graphQL query or mutation. For example, to change an argument name from `userID` to `userId` in a mutation called `createUser(userID: ID!)` you could add the following:
 
 ```js
 import { FieldArgNameRewriter } from 'graphql-query-rewriter';
@@ -146,7 +146,7 @@ const rewriter = new FieldArgNameRewriter({
 
 ### FieldArgsToInputTypeRewriter
 
-The `FieldArgsToInputTypeRewriter` can be used to move mutation parameters into a single input object, by default named `input`. It's a best-practice to use a single input type for mutations in GraphQL, and it's required by the [Relay GraphQL Spec](https://facebook.github.io/relay/docs/en/graphql-server-specification.html#mutations). For example, to migrate the mutation `createUser(username: String!, password: String!)` to a mutation with a proper input type like:
+`FieldArgsToInputTypeRewriter` can be used to move mutation parameters into a single input object, by default named `input`. It's a best-practice to use a single input type for mutations in GraphQL, and it's required by the [Relay GraphQL Spec](https://facebook.github.io/relay/docs/en/graphql-server-specification.html#mutations). For example, to migrate the mutation `createUser(username: String!, password: String!)` to a mutation with a proper input type like:
 ```
 mutation createUser(input: CreateUserInput!) { ... }
 
@@ -191,7 +191,7 @@ mutation createUser($username: String!, $password: String!) {
 
 ### NestFieldOutputsRewriter
 
-The `NestFieldOutputsRewriter` can be used to move mutation outputs into a nested payload object. It's a best-practice for each mutation in GraphQL to have its their own output type, and it's required by the [Relay GraphQL Spec](https://facebook.github.io/relay/docs/en/graphql-server-specification.html#mutations). For example, to migrate the mutation `createUser(input: CreateUserInput!): User!` to a mutation with a proper output payload type like:
+`NestFieldOutputsRewriter` can be used to move mutation outputs into a nested payload object. It's a best-practice for each mutation in GraphQL to have its own output type, and it's required by the [Relay GraphQL Spec](https://facebook.github.io/relay/docs/en/graphql-server-specification.html#mutations). For example, to migrate the mutation `createUser(input: CreateUserInput!): User!` to a mutation with a proper output payload type like:
 
 ```
 mutation createUser(input: CreateUserInput!) CreateUserPayload
