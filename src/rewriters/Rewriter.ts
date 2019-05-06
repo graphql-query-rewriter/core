@@ -9,6 +9,10 @@ export interface RewriterOpts {
   rootTypes?: RootType[];
 }
 
+/**
+ * Abstract base Rewriter class
+ * Extend this class and overwrite its methods to create a new rewriter
+ */
 abstract class Rewriter {
   protected fieldName: string;
   protected rootTypes: RootType[] = ['query', 'mutation', 'fragment'];

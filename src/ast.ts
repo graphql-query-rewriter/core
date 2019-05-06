@@ -2,6 +2,7 @@ import { ASTNode, DocumentNode, VariableDefinitionNode } from 'graphql';
 
 const ignoreKeys = new Set(['loc']);
 
+/** @hidden */
 export const nodesMatch = (node1: ASTNode, node2: ASTNode): boolean => {
   for (const key of Object.keys(node1)) {
     if (ignoreKeys.has(key)) continue;
@@ -22,6 +23,7 @@ export const nodesMatch = (node1: ASTNode, node2: ASTNode): boolean => {
   return true;
 };
 
+/** @hidden */
 export interface NodeAndVarDefs {
   node: ASTNode;
   variableDefinitions: ReadonlyArray<VariableDefinitionNode>;
@@ -31,6 +33,7 @@ export interface NodeAndVarDefs {
  * Walk the document add rewrite nodes along the way
  * @param doc
  * @param callback Called on each node, and returns a new rewritten node
+ * @hidden
  */
 export const rewriteDoc = (
   doc: DocumentNode,
@@ -78,6 +81,7 @@ export const rewriteDoc = (
   return replaceVariableDefinitions(rewrittenDoc, variableDefinitions);
 };
 
+/** @hidden */
 export const extractVariableDefinitions = (
   doc: DocumentNode
 ): ReadonlyArray<VariableDefinitionNode> => {
@@ -89,6 +93,7 @@ export const extractVariableDefinitions = (
   return [];
 };
 
+/** @hidden */
 export const replaceVariableDefinitions = (
   doc: DocumentNode,
   variableDefinitions: ReadonlyArray<VariableDefinitionNode>
@@ -115,10 +120,12 @@ export const extractPath = (parents: ReadonlyArray<ASTNode>): ReadonlyArray<stri
   return path;
 };
 
+/** @hidden */
 interface ResultObj {
   [key: string]: any;
 }
 
+/** @hidden */
 export const rewriteResultsAtPath = (
   results: ResultObj,
   path: ReadonlyArray<string>,

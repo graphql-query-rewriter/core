@@ -7,6 +7,10 @@ interface RewriterMatch {
   path: ReadonlyArray<string>;
 }
 
+/**
+ * Create a new instance of this class for each request that needs to be processed
+ * This class handles rewriting the query and the reponse according to the rewriters passed in
+ */
 export default class RewriteHandler {
   private rewriters: Rewriter[];
   private matches: RewriterMatch[] = [];
@@ -17,6 +21,11 @@ export default class RewriteHandler {
     this.rewriters = rewriters;
   }
 
+  /**
+   * Call this on a graphQL request in middleware before passing on to the real graphql processor
+   * @param query The graphQL query
+   * @param variables The variables map for the graphQL query
+   */
   public rewriteRequest(query: string, variables?: Variables) {
     if (this.hasProcessedRequest) throw new Error('This handler has already rewritten a request');
     this.hasProcessedRequest = true;
@@ -42,6 +51,11 @@ export default class RewriteHandler {
     return { query: print(rewrittenDoc), variables: rewrittenVariables };
   }
 
+  /**
+   * Call this on the response returned from graphQL before passing it back to the client
+   * This will change the output to match what the original query requires
+   * @param response The graphQL response object
+   */
   public rewriteResponse(response: any) {
     if (this.hasProcessedResponse) throw new Error('This handler has already returned a response');
     this.hasProcessedResponse = true;

@@ -7,6 +7,8 @@
 
 Seamlessly turn breaking GraphQL schema changes into non-breaking changes by rewriting queries in middleware.
 
+Full API docs are available at https://chanind.github.io/graphql-query-rewriter
+
 ## The Problem
 
 GraphQL is great at enforcing a strict schema for APIs, but its lack of versioning makes it extremely difficult to make changes to GraphQL schemas without breaking existing clients. For example, take the following query:
