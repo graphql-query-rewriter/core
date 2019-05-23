@@ -1,13 +1,13 @@
 # GraphQL Query Rewriter
 
-[![CircleCI](https://circleci.com/gh/chanind/graphql-query-rewriter/tree/master.svg?style=shield)](https://circleci.com/gh/chanind/graphql-query-rewriter/tree/master)
-[![Coverage Status](https://coveralls.io/repos/github/chanind/graphql-query-rewriter/badge.svg?branch=master)](https://coveralls.io/github/chanind/graphql-query-rewriter?branch=master)
+[![CircleCI](https://circleci.com/gh/ef-eng/graphql-query-rewriter/tree/master.svg?style=shield)](https://circleci.com/gh/ef-eng/graphql-query-rewriter/tree/master)
+[![Coverage Status](https://coveralls.io/repos/github/ef-eng/graphql-query-rewriter/badge.svg?branch=master)](https://coveralls.io/github/ef-eng/graphql-query-rewriter?branch=master)
 [![npm](https://badgen.net/npm/v/graphql-query-rewriter)](https://www.npmjs.com/package/graphql-query-rewriter)
 [![license](https://badgen.net/npm/license/graphql-query-rewriter)](https://opensource.org/licenses/MIT)
 
 Seamlessly turn breaking GraphQL schema changes into non-breaking changes by rewriting queries in middleware.
 
-Full API docs are available at https://chanind.github.io/graphql-query-rewriter
+Full API docs are available at https://ef-eng.github.io/graphql-query-rewriter
 
 ## The Problem
 
@@ -262,9 +262,9 @@ Contributions are welcome! These steps will guide you through contributing to th
 - Fork the repo
 - Clone it and install dependencies
 
-  git clone https://github.com/chanind/graphql-query-rewriter
+  git clone https://github.com/ef-eng/graphql-query-rewriter
   yarn install
 
 Make and commit your changes. Make sure the commands yarn run build and yarn run test:prod are working.
 
-Finally send a [GitHub Pull Request](https://github.com/chanind/graphql-query-rewriter/compare?expand=1) with a clear list of what you've done. Make sure all of your commits are atomic (one feature per commit). Please add tests for any features that you add or change.
+Finally send a [GitHub Pull Request](https://github.com/ef-eng/graphql-query-rewriter/compare?expand=1) with a clear list of what you've done. Make sure all of your commits are atomic (one feature per commit). Please add tests for any features that you add or change.
