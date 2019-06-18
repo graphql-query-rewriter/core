@@ -78,16 +78,29 @@ Now your schema is clean and up to date, and deprecated clients keep working! Gr
 
 ## Installation
 
-Installation requires the base package `graphql-query-rewriter` and a middleware adapter for the web framework you use. Currently only `graphql-express` is supported, but `apollo-server` and more will be added soon!
+Installation requires the base package `graphql-query-rewriter` and a middleware adapter for the web framework you use. Currently works with `express-graphql` and `apollo-server`.
+
+#### For express-graphql
 
 ```
-# for express-graphql
 npm install graphql-query-rewriter express-graphql-query-rewriter
+```
+
+#### For Apollo-server
+
+Apollo server works with `express-graphql-query-rewriter` via [Apollo server middleware](https://www.apollographql.com/docs/apollo-server/migration-two-dot/#adding-additional-middleware-to-apollo-server-2). 
+
+```
+npm install graphql-query-rewriter express-graphql express-graphql-query-rewriter
 ```
 
 ## Usage
 
-First you need to set up an appropriate middleware for your server. Currently, only [express-graphql](https://github.com/graphql/express-graphql) is supported, so we'll be using the `express-graphql-query-rewriter` middleware. This middleware goes directy before your `graphql` handler in express:
+First you need to set up an appropriate middleware for your server.
+
+#### For express-graphql
+
+With [express-graphql](https://github.com/graphql/express-graphql), you can use the `express-graphql-query-rewriter` middleware. This middleware goes directy before your `graphql` handler in express:
 
 ```js
 import { graphqlRewriterMiddleware } from 'express-graphql-query-rewriter';
@@ -101,6 +114,32 @@ app.use('/graphql',  graphqlRewriterMiddleware({
 app.use('/graphql', graphqlHTTP( ... ));
 ...
 ```
+
+#### For apollo-server
+
+Apollo-server can also use the `express-graphql-query-rewriter` middleware like below:
+
+```js
+const { ApolloServer, gql } = require("apollo-server-express");
+const express = require("express");
+const { graphqlRewriterMiddleware } = require("express-graphql-query-rewriter");
+
+// configure ApolloServer as usual
+const server = new ApolloServer({ typeDefs, resolvers });
+
+const app = express();
+const path = "/graphql";
+app.use(
+  path,
+  graphqlRewriterMiddleware({
+    rewriters: [ /* place rewriters here */]
+  })
+);
+server.applyMiddleware({ app, path, bodyParserConfig: false });
+...
+```
+
+Note that you need to specify `bodyParserConfig: false` in `applyMiddleware()` since `express-graphql-query-rewriter` already parses the graphQL body in order to rewrite it.
 
 ### FieldArgTypeRewriter
 
