@@ -47,7 +47,7 @@ export const rewriteDoc = (
     const nextNodeAndVars = callback(curNodeAndVars, curParents);
     variableDefinitions = nextNodeAndVars.variableDefinitions;
     const node = nextNodeAndVars.node;
-    const nextParents = [node, ...curParents];
+    const nextParents = [...curParents, node];
     for (const key of Object.keys(node)) {
       if (key === 'loc') continue;
       const val = (node as any)[key];

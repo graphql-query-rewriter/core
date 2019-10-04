@@ -97,4 +97,42 @@ describe('Rewrite field arg type', () => {
       }
     });
   });
+
+  it('works on deeply nested fields', () => {
+    const query = gqlFmt`
+      query doTheThings($arg1: String!, $arg2: String) {
+        stuff {
+          things(identifier: $arg1, arg2: $arg2) {
+            cat
+          }
+        }
+      }
+    `;
+    const expectedRewritenQuery = gqlFmt`
+      query doTheThings($arg1: Int!, $arg2: String) {
+        stuff {
+          things(identifier: $arg1, arg2: $arg2) {
+            cat
+          }
+        }
+      }
+    `;
+
+    const handler = new RewriteHandler([
+      new FieldArgTypeRewriter({
+        fieldName: 'things',
+        argName: 'identifier',
+        oldType: 'String!',
+        newType: 'Int!',
+        coerceVariable: val => parseInt(val, 10)
+      })
+    ]);
+    expect(handler.rewriteRequest(query, { arg1: '123', arg2: 'blah' })).toEqual({
+      query: expectedRewritenQuery,
+      variables: {
+        arg1: 123,
+        arg2: 'blah'
+      }
+    });
+  });
 });

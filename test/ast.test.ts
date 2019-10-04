@@ -1,5 +1,6 @@
 import { OperationDefinitionNode, parse } from 'graphql';
 import {
+  extractPath,
   extractVariableDefinitions,
   nodesMatch,
   replaceVariableDefinitions,
@@ -181,6 +182,33 @@ describe('ast utils', () => {
       expect((rewrittenDoc.definitions[1] as OperationDefinitionNode).variableDefinitions).toBe(
         otherVarDefs
       );
+    });
+  });
+
+  describe('extractPath', () => {
+    it('returns the path to the current node in the final document', () => {
+      const doc = parse(`
+        query doStuff($arg1: String) {
+          thing1 { thing2 { thing3 { thing4 } } }
+        }
+      `);
+      const parents = [
+        doc as any,
+        (doc as any).definitions[0],
+        (doc as any).definitions[0].selectionSet,
+        (doc as any).definitions[0].selectionSet.selections[0],
+        (doc as any).definitions[0].selectionSet.selections[0].selectionSet,
+        (doc as any).definitions[0].selectionSet.selections[0].selectionSet.selections[0],
+        (doc as any).definitions[0].selectionSet.selections[0].selectionSet.selections[0]
+          .selectionSet,
+        (doc as any).definitions[0].selectionSet.selections[0].selectionSet.selections[0]
+          .selectionSet.selections[0],
+        (doc as any).definitions[0].selectionSet.selections[0].selectionSet.selections[0]
+          .selectionSet.selections[0].selectionSet,
+        (doc as any).definitions[0].selectionSet.selections[0].selectionSet.selections[0]
+          .selectionSet.selections[0].selectionSet.selections[0]
+      ];
+      expect(extractPath(parents)).toEqual(['thing1', 'thing2', 'thing3', 'thing4']);
     });
   });
 });
