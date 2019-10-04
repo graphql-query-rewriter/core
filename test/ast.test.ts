@@ -210,5 +210,30 @@ describe('ast utils', () => {
       ];
       expect(extractPath(parents)).toEqual(['thing1', 'thing2', 'thing3', 'thing4']);
     });
+
+    it('reconstructs the path through fragments', () => {
+      const doc = parse(`
+        query doStuff($arg1: String) {
+          thing1 {
+            thing2 {
+              ... thing2Fragment
+            }
+          }
+        }
+
+        fragment thing2Fragment on Thing2 {
+          thing3
+        }
+      `);
+      const parents = [
+        doc as any,
+        (doc as any).definitions[1],
+        (doc as any).definitions[1].selectionSet,
+        (doc as any).definitions[1].selectionSet.selections[0]
+      ];
+
+      debugger;
+      expect(extractPath(parents)).toEqual(['thing1', 'thing2', 'thing3']);
+    });
   });
 });
