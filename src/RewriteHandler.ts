@@ -1,4 +1,4 @@
-import { parse, print, FragmentDefinitionNode } from 'graphql';
+import { FragmentDefinitionNode, parse, print } from 'graphql';
 import { extractPath, FragmentTracer, rewriteDoc, rewriteResultsAtPath } from './ast';
 import Rewriter, { Variables } from './rewriters/Rewriter';
 
