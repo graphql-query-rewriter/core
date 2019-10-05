@@ -114,4 +114,116 @@ describe('Rewrite scalar field to be a nested object with a single scalar field'
       }
     });
   });
+
+  it('works within repeated and nested fragments', () => {
+    const handler = new RewriteHandler([
+      new ScalarFieldToObjectFieldRewriter({
+        fieldName: 'title',
+        objectFieldName: 'text'
+      })
+    ]);
+
+    const query = gqlFmt`
+      query getTheThing {
+        theThing {
+          ...thingFragment
+        }
+        otherThing {
+          ...otherThingFragment
+        }
+      }
+
+      fragment thingFragment on Thing {
+        id
+        title
+      }
+
+      fragment otherThingFragment on Thing {
+        id
+        edges {
+          node {
+            ...thingFragment
+          }
+        }
+      }
+    `;
+    const expectedRewritenQuery = gqlFmt`
+      query getTheThing {
+        theThing {
+          ...thingFragment
+        }
+        otherThing {
+          ...otherThingFragment
+        }
+      }
+
+      fragment thingFragment on Thing {
+        id
+        title {
+          text
+        }
+      }
+
+      fragment otherThingFragment on Thing {
+        id
+        edges {
+          node {
+            ...thingFragment
+          }
+        }
+      }
+    `;
+    expect(handler.rewriteRequest(query)).toEqual({
+      query: expectedRewritenQuery
+    });
+    expect(
+      handler.rewriteResponse({
+        theThing: {
+          id: 1,
+          title: {
+            text: 'THING'
+          }
+        },
+        otherThing: {
+          id: 3,
+          edges: [
+            {
+              node: {
+                title: {
+                  text: 'NODE_TEXT1'
+                }
+              }
+            },
+            {
+              node: {
+                title: {
+                  text: 'NODE_TEXT2'
+                }
+              }
+            }
+          ]
+        }
+      })
+    ).toEqual({
+      theThing: {
+        id: 1,
+        title: 'THING'
+      },
+      otherThing: {
+        id: 3,
+        edges: [
+          {
+            node: {
+              title: 'NODE_TEXT1'
+            }
+          },
+          {
+            node: {
+              title: 'NODE_TEXT2'
+            }
+          }
+        ]
+      }
+    });
+  });
 });

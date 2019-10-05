@@ -4,7 +4,8 @@ import {
   extractVariableDefinitions,
   nodesMatch,
   replaceVariableDefinitions,
-  rewriteResultsAtPath
+  rewriteResultsAtPath,
+  FragmentTracer
 } from '../src/ast';
 
 describe('ast utils', () => {
@@ -210,30 +211,80 @@ describe('ast utils', () => {
       ];
       expect(extractPath(parents)).toEqual(['thing1', 'thing2', 'thing3', 'thing4']);
     });
+  });
 
-    it('reconstructs the path through fragments', () => {
+  describe('FragmentTracer', () => {
+    it('derives all nested paths to each fragment in the document', () => {
       const doc = parse(`
         query doStuff($arg1: String) {
           thing1 {
             thing2 {
-              ... thing2Fragment
+              ... fragment1
             }
+            ... fragment1
+          }
+          ... fragment2
+        }
+
+        fragment fragment1 on Thing {
+          thing3 {
+            ... fragment2
+          }
+          ... fragment2
+        }
+
+        fragment fragment2 on Thing {
+          thing4
+        }
+      `);
+      const tracer = new FragmentTracer(doc);
+      expect(tracer.getPathsToFragment('fragment1')).toEqual([['thing1', 'thing2'], ['thing1']]);
+      expect(tracer.getPathsToFragment('fragment2')).toEqual([
+        [],
+        ['thing1', 'thing2', 'thing3'],
+        ['thing1', 'thing2'],
+        ['thing1', 'thing3'],
+        ['thing1']
+      ]);
+    });
+
+    it('return empty array if there are no paths to the fragment', () => {
+      const doc = parse(`
+        query doStuff($arg1: String) {
+          thing1 {
+            name
+          }
+        }
+        fragment fragment2 on Thing {
+          meh
+        }
+      `);
+      const tracer = new FragmentTracer(doc);
+      expect(tracer.getPathsToFragment('fragment2')).toEqual([]);
+      expect(tracer.getPathsToFragment('nonExistentFragment')).toEqual([]);
+    });
+
+    it('does not get stuck in infinite loops in fragments', () => {
+      const doc = parse(`
+        query doStuff($arg1: String) {
+          ... fragment1
+        }
+
+        fragment fragment1 on Thing {
+          thing1 {
+            ...fragment2
           }
         }
 
-        fragment thing2Fragment on Thing2 {
-          thing3
+        fragment fragment2 on Thing {
+          thing2 {
+            ...fragment1
+          }
         }
       `);
-      const parents = [
-        doc as any,
-        (doc as any).definitions[1],
-        (doc as any).definitions[1].selectionSet,
-        (doc as any).definitions[1].selectionSet.selections[0]
-      ];
-
-      debugger;
-      expect(extractPath(parents)).toEqual(['thing1', 'thing2', 'thing3']);
+      const tracer = new FragmentTracer(doc);
+      expect(tracer.getPathsToFragment('fragment1')).toEqual([[], ['thing1', 'thing2']]);
+      expect(tracer.getPathsToFragment('fragment2')).toEqual([['thing1']]);
     });
   });
 });
