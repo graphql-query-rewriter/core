@@ -1,4 +1,5 @@
-import { ASTNode, DocumentNode, VariableDefinitionNode } from 'graphql';
+import { ASTNode, DocumentNode, FragmentDefinitionNode, VariableDefinitionNode } from 'graphql';
+import { pushToArrayAtKey } from './utils';
 
 const ignoreKeys = new Set(['loc']);
 
@@ -27,6 +28,135 @@ export const nodesMatch = (node1: ASTNode, node2: ASTNode): boolean => {
 export interface NodeAndVarDefs {
   node: ASTNode;
   variableDefinitions: ReadonlyArray<VariableDefinitionNode>;
+}
+
+/** @hidden */
+export interface FragmentPathMap {
+  [fragmentName: string]: ReadonlyArray<ReadonlyArray<string>>;
+}
+
+interface MutableFragmentPathMap {
+  [fragmentName: string]: Array<ReadonlyArray<string>>;
+}
+
+/** @hidden */
+export class FragmentTracer {
+  private fragmentPathMap?: FragmentPathMap;
+  private doc: DocumentNode;
+
+  constructor(doc: DocumentNode) {
+    this.doc = doc;
+  }
+
+  public getPathsToFragment(fragmentName: string): ReadonlyArray<ReadonlyArray<string>> {
+    if (!this.fragmentPathMap) {
+      this.fragmentPathMap = this.buildFragmentPathMap();
+    }
+    return this.fragmentPathMap[fragmentName] || [];
+  }
+
+  // prepend the paths from the original document into this fragment to the inner fragment paths
+  public prependFragmentPaths(
+    fragmentName: string,
+    pathWithinFragment: ReadonlyArray<string>
+  ): ReadonlyArray<ReadonlyArray<string>> {
+    return this.getPathsToFragment(fragmentName).map(path => [...path, ...pathWithinFragment]);
+  }
+
+  private getFragmentDefs(): ReadonlyArray<FragmentDefinitionNode> {
+    return this.doc.definitions.filter(
+      ({ kind }) => kind === 'FragmentDefinition'
+    ) as FragmentDefinitionNode[];
+  }
+
+  private getFragmentPartialPathMap(startNode: ASTNode): MutableFragmentPathMap {
+    const partialPathMap: MutableFragmentPathMap = {};
+    const recursivelyBuildFragmentPaths = (node: ASTNode, curParents: ReadonlyArray<ASTNode>) => {
+      if (node.kind === 'FragmentSpread') {
+        pushToArrayAtKey(partialPathMap, node.name.value, extractPath(curParents));
+      }
+      const nextParents = [...curParents, node];
+      if ('selectionSet' in node && node.selectionSet) {
+        for (const selection of node.selectionSet.selections) {
+          recursivelyBuildFragmentPaths(selection, nextParents);
+        }
+      }
+    };
+    recursivelyBuildFragmentPaths(startNode, []);
+    return partialPathMap;
+  }
+
+  private mergeFragmentPaths(
+    fragmentName: string,
+    paths: Array<ReadonlyArray<string>>,
+    fragmentPartialPathsMap: { [fragmentName: string]: FragmentPathMap }
+  ) {
+    const mergedPaths: MutableFragmentPathMap = {};
+
+    const resursivelyBuildMergedPathsMap = (
+      curFragmentName: string,
+      curPaths: Array<ReadonlyArray<string>>,
+      seenFragments: ReadonlySet<string>
+    ) => {
+      // recursive fragments are invalid graphQL - just exit here. otherwise this will be an infinite loop
+      if (seenFragments.has(curFragmentName)) return;
+      const nextSeenFragments = new Set(seenFragments);
+      nextSeenFragments.add(curFragmentName);
+      const nextPartialPaths = fragmentPartialPathsMap[curFragmentName];
+      // if there are not other fragments nested inside of this fragment, we're done
+      if (!nextPartialPaths) return;
+
+      for (const [childFragmentName, childFragmentPaths] of Object.entries(nextPartialPaths)) {
+        for (const path of curPaths) {
+          const mergedChildPaths: Array<ReadonlyArray<string>> = [];
+          for (const childPath of childFragmentPaths) {
+            const mergedPath = [...path, ...childPath];
+            mergedChildPaths.push(mergedPath);
+            pushToArrayAtKey(mergedPaths, childFragmentName, mergedPath);
+          }
+          resursivelyBuildMergedPathsMap(childFragmentName, mergedChildPaths, nextSeenFragments);
+        }
+      }
+    };
+
+    resursivelyBuildMergedPathsMap(fragmentName, paths, new Set());
+    return mergedPaths;
+  }
+
+  private buildFragmentPathMap(): FragmentPathMap {
+    const mainOperation = this.doc.definitions.find(node => node.kind === 'OperationDefinition');
+    if (!mainOperation) return {};
+
+    // partial paths are the paths inside of each fragmnt to other fragments
+    const fragmentPartialPathsMap: { [fragmentName: string]: FragmentPathMap } = {};
+    for (const fragmentDef of this.getFragmentDefs()) {
+      fragmentPartialPathsMap[fragmentDef.name.value] = this.getFragmentPartialPathMap(fragmentDef);
+    }
+
+    // start with the direct paths to fragments inside of the main operation
+    const simpleFragmentPathMap: MutableFragmentPathMap = this.getFragmentPartialPathMap(
+      mainOperation
+    );
+    const fragmentPathMap: MutableFragmentPathMap = { ...simpleFragmentPathMap };
+    // next, we'll recursively trace the partials into their subpartials to fill out all possible paths to each fragment
+    for (const [fragmentName, simplePaths] of Object.entries(simpleFragmentPathMap)) {
+      const mergedFragmentPathsMap = this.mergeFragmentPaths(
+        fragmentName,
+        simplePaths,
+        fragmentPartialPathsMap
+      );
+      for (const [mergedFragmentName, mergedFragmentPaths] of Object.entries(
+        mergedFragmentPathsMap
+      )) {
+        fragmentPathMap[mergedFragmentName] = [
+          ...(fragmentPathMap[mergedFragmentName] || []),
+          ...mergedFragmentPaths
+        ];
+      }
+    }
+
+    return fragmentPathMap;
+  }
 }
 
 /**

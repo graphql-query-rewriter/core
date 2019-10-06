@@ -232,6 +232,69 @@ mutation createUser($username: String!, $password: String!) {
 }
 ```
 
+### ScalarFieldToObjectFieldRewriter
+
+`ScalarFieldToObjectFieldRewriter` can be used to rewrite a scalar field into an object selecing a single scalar field. For example, imagine there's a `User` type with a `full_name` field that's of type `String!`. But to internationalize, that `full_name` field needs to support different names in different languges, something like `full_name: { default: 'Jackie Chan', 'cn': '成龙', ... }`. We could use the `ScalarFieldToObjectFieldRewriter` to rewriter `full_name` to instead select the `default` name. Specifically, given we have the schema below:
+
+```
+type User {
+  id: ID!
+  full_name: String!
+  ...
+}
+```
+
+and we want to change it to
+
+```
+type User {
+  id: ID!
+  full_name: {
+    default: String!
+    en: String
+    cn: String
+    ...
+  }
+  ...
+}
+```
+
+we can make this change with the following rewriter:
+
+```js
+import { ScalarFieldToObjectFieldRewriter } from 'graphql-query-rewriter';
+
+// add this to the rewriters array in graphqlRewriterMiddleware(...)
+const rewriter = new ScalarFieldToObjectFieldRewriter({
+  fieldName: 'full_name',
+  objectFieldName: 'default',
+})
+```
+
+For example, This would rewrite the following query:
+
+```
+query getUser(id: ID!) {
+  user {
+    id
+    full_name
+  }
+}
+```
+
+and turn it into:
+
+```
+query getUser(id: ID!) {
+  user {
+    id
+    full_name {
+      default
+    }
+  }
+}
+```
+
 ### NestFieldOutputsRewriter
 
 `NestFieldOutputsRewriter` can be used to move mutation outputs into a nested payload object. It's a best-practice for each mutation in GraphQL to have its own output type, and it's required by the [Relay GraphQL Spec](https://facebook.github.io/relay/docs/en/graphql-server-specification.html#mutations). For example, to migrate the mutation `createUser(input: CreateUserInput!): User!` to a mutation with a proper output payload type like:

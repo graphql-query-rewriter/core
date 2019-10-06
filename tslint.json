@@ -3,6 +3,7 @@
   "rules": {
     "interface-name": false,
     "object-literal-sort-keys": false,
-    "no-increment-decrement": false
+    "no-increment-decrement": false,
+    "prefer-array-literal": [true, { "allow-type-parameters": true }]
   }
 }
