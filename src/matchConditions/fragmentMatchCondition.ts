@@ -7,7 +7,7 @@ export interface FragmentMatchConditionOpts {
   pathRegexes?: RegExp[];
 }
 
-export default ({
+const fragmentMatchCondition = ({
   fragmentNames,
   fragmentTypes,
   pathRegexes
@@ -36,3 +36,5 @@ export default ({
     return true;
   };
 };
+
+export default fragmentMatchCondition;

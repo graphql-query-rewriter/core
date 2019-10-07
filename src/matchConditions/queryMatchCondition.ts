@@ -5,10 +5,15 @@ export interface QueryMatchConditionOpts {
   pathRegexes?: RegExp[];
 }
 
-export default ({ queryNames, pathRegexes }: QueryMatchConditionOpts = {}): matchCondition => {
+const queryMatchCondition = ({
+  queryNames,
+  pathRegexes
+}: QueryMatchConditionOpts = {}): matchCondition => {
   return operationMatchCondition({
     pathRegexes,
     operationNames: queryNames,
     operationTypes: ['query']
   });
 };
+
+export default queryMatchCondition;

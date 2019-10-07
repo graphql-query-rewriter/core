@@ -5,7 +5,7 @@ export interface MutationMatchConditionOpts {
   pathRegexes?: RegExp[];
 }
 
-export default ({
+const mutationMatchCondition = ({
   mutationNames,
   pathRegexes
 }: MutationMatchConditionOpts = {}): matchCondition => {
@@ -15,3 +15,5 @@ export default ({
     operationTypes: ['mutation']
   });
 };
+
+export default mutationMatchCondition;
