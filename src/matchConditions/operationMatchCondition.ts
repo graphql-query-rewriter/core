@@ -1,12 +1,15 @@
 import { OperationDefinitionNode } from 'graphql';
 import { extractPath } from '../ast';
 import matchCondition from './matchCondition';
+
+/** @hidden */
 export interface OperationMatchConditionOpts {
   operationNames?: string[];
   operationTypes?: string[];
   pathRegexes?: RegExp[];
 }
 
+/** @hidden */
 export default ({
   operationNames,
   operationTypes,

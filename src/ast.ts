@@ -35,6 +35,7 @@ export interface FragmentPathMap {
   [fragmentName: string]: ReadonlyArray<ReadonlyArray<string>>;
 }
 
+/** @hidden */
 interface MutableFragmentPathMap {
   [fragmentName: string]: Array<ReadonlyArray<string>>;
 }
@@ -240,6 +241,7 @@ export const replaceVariableDefinitions = (
 /**
  * return the path that will be returned in the response from from the chain of parents
  */
+/** @hidden */
 export const extractPath = (parents: ReadonlyArray<ASTNode>): ReadonlyArray<string> => {
   const path: string[] = [];
   parents.forEach(parent => {

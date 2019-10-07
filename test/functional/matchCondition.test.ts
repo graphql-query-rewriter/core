@@ -1,4 +1,4 @@
-import { queryMatchCondition, mutationMatchCondition } from '../../src/matchConditions';
+import { mutationMatchCondition, queryMatchCondition } from '../../src/matchConditions';
 import RewriteHandler from '../../src/RewriteHandler';
 import ScalarFieldToObjectFieldRewriter from '../../src/rewriters/ScalarFieldToObjectFieldRewriter';
 import { gqlFmt } from '../testUtils';
