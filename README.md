@@ -13,14 +13,15 @@ Full API docs are available at https://ef-eng.github.io/graphql-query-rewriter
 
 GraphQL is great at enforcing a strict schema for APIs, but its lack of versioning makes it extremely difficult to make changes to GraphQL schemas without breaking existing clients. For example, take the following query:
 
-```
+```graphql
 query getUserById($id: String!) {
   userById(id: $id) {
     ...
   }
 }
 ```
-Oh no! We should have used `ID!` as the type for `userById(id)` instead of `String!`, but it's already in production! Now if we change our schema to use `ID!` instead of `String!` then our old clients will start getting the error `Variable "$id" of type "String!" used in position expecting type "ID!"`. Currently your only options are to continue using the incorrect `String!` type forever (*eeew*), or make a new query with a new name, like `userByIdNew(id: ID!)` (*gross*)!
+
+Oh no! We should have used `ID!` as the type for `userById(id)` instead of `String!`, but it's already in production! Now if we change our schema to use `ID!` instead of `String!` then our old clients will start getting the error `Variable "$id" of type "String!" used in position expecting type "ID!"`. Currently your only options are to continue using the incorrect `String!` type forever (_eeew_), or make a new query with a new name, like `userByIdNew(id: ID!)` (_gross_)!
 
 Wouldn't it be great if you could change the schema to use `ID!`, but just silently replace `String!` in old queries with `ID!` in your middleware so the old queries will continue to work just like they had been?
 
@@ -56,7 +57,8 @@ app.use('/graphql', graphqlHTTP( ... ));
 ```
 
 Now, when old clients send the following query:
-```
+
+```graphql
 query getUserById($id: String!) {
   userById(id: $id) {
     ...
@@ -65,7 +67,8 @@ query getUserById($id: String!) {
 ```
 
 It will be rewritten before it gets processed to:
-```
+
+```graphql
 query getUserById($id: ID!) {
   userById(id: $id) {
     ...
@@ -74,7 +77,6 @@ query getUserById($id: ID!) {
 ```
 
 Now your schema is clean and up to date, and deprecated clients keep working! GraphQL Schema Rewriter can rewrite much more complex queries than just changing a single input type as well.
-
 
 ## Installation
 
@@ -88,7 +90,7 @@ npm install graphql-query-rewriter express-graphql-query-rewriter
 
 #### For Apollo-server
 
-Apollo server works with `express-graphql-query-rewriter` via [Apollo server middleware](https://www.apollographql.com/docs/apollo-server/migration-two-dot/#adding-additional-middleware-to-apollo-server-2). 
+Apollo server works with `express-graphql-query-rewriter` via [Apollo server middleware](https://www.apollographql.com/docs/apollo-server/migration-two-dot/#adding-additional-middleware-to-apollo-server-2).
 
 ```
 npm install graphql-query-rewriter express-graphql express-graphql-query-rewriter
@@ -154,10 +156,10 @@ const rewriter = new FieldArgTypeRewriter({
   argName: 'arg1',
   oldType: 'Int',
   newType: 'Int!'
-})
+});
 ```
 
-Sometimes, you'll need to do some preprocessing on the variables submitted to the rewritten argument to make them into the type needed by the new schema. You can do this by passing in a `coerceVariable` function which returns a new value of the variable. For example, the following changes the value of `arg1` from `Int!` to  `String!`, and also changes the value of `arg1` to a string as well:
+Sometimes, you'll need to do some preprocessing on the variables submitted to the rewritten argument to make them into the type needed by the new schema. You can do this by passing in a `coerceVariable` function which returns a new value of the variable. For example, the following changes the value of `arg1` from `Int!` to `String!`, and also changes the value of `arg1` to a string as well:
 
 ```js
 import { FieldArgTypeRewriter } from 'graphql-query-rewriter';
@@ -184,13 +186,14 @@ const rewriter = new FieldArgNameRewriter({
   fieldName: 'createUser',
   oldArgName: 'userID',
   newArgName: 'userId'
-})
+});
 ```
 
 ### FieldArgsToInputTypeRewriter
 
 `FieldArgsToInputTypeRewriter` can be used to move mutation parameters into a single input object, by default named `input`. It's a best-practice to use a single input type for mutations in GraphQL, and it's required by the [Relay GraphQL Spec](https://facebook.github.io/relay/docs/en/graphql-server-specification.html#mutations). For example, to migrate the mutation `createUser(username: String!, password: String!)` to a mutation with a proper input type like:
-```
+
+```graphql
 mutation createUser(input: CreateUserInput!) { ... }
 
 type CreateUserInput {
@@ -209,12 +212,12 @@ const rewriter = new FieldArgsToInputTypeRewriter({
   fieldName: 'createUser',
   argNames: ['username', 'password'],
   inputArgName: 'input' // inputArgName can be left out to use 'input' by default
-})
+});
 ```
 
 For example, This would rewrite the following mutation:
 
-```
+```graphql
 mutation createUser($username: String!, $password: String!) {
   createUser(username: $username, password: $password) {
     ...
@@ -224,7 +227,7 @@ mutation createUser($username: String!, $password: String!) {
 
 and turn it into:
 
-```
+```graphql
 mutation createUser($username: String!, $password: String!) {
   createUser(input: { username: $username, password: $password }) {
     ...
@@ -236,7 +239,7 @@ mutation createUser($username: String!, $password: String!) {
 
 `ScalarFieldToObjectFieldRewriter` can be used to rewrite a scalar field into an object selecing a single scalar field. For example, imagine there's a `User` type with a `full_name` field that's of type `String!`. But to internationalize, that `full_name` field needs to support different names in different languges, something like `full_name: { default: 'Jackie Chan', 'cn': '成龙', ... }`. We could use the `ScalarFieldToObjectFieldRewriter` to rewriter `full_name` to instead select the `default` name. Specifically, given we have the schema below:
 
-```
+```graphql
 type User {
   id: ID!
   full_name: String!
@@ -246,7 +249,7 @@ type User {
 
 and we want to change it to
 
-```
+```graphql
 type User {
   id: ID!
   full_name: {
@@ -267,13 +270,13 @@ import { ScalarFieldToObjectFieldRewriter } from 'graphql-query-rewriter';
 // add this to the rewriters array in graphqlRewriterMiddleware(...)
 const rewriter = new ScalarFieldToObjectFieldRewriter({
   fieldName: 'full_name',
-  objectFieldName: 'default',
-})
+  objectFieldName: 'default'
+});
 ```
 
 For example, This would rewrite the following query:
 
-```
+```graphql
 query getUser(id: ID!) {
   user {
     id
@@ -284,7 +287,7 @@ query getUser(id: ID!) {
 
 and turn it into:
 
-```
+```graphql
 query getUser(id: ID!) {
   user {
     id
@@ -299,7 +302,7 @@ query getUser(id: ID!) {
 
 `NestFieldOutputsRewriter` can be used to move mutation outputs into a nested payload object. It's a best-practice for each mutation in GraphQL to have its own output type, and it's required by the [Relay GraphQL Spec](https://facebook.github.io/relay/docs/en/graphql-server-specification.html#mutations). For example, to migrate the mutation `createUser(input: CreateUserInput!): User!` to a mutation with a proper output payload type like:
 
-```
+```graphql
 mutation createUser(input: CreateUserInput!) CreateUserPayload
 
 type User {
@@ -322,12 +325,12 @@ const rewriter = new NestFieldOutputsRewriter({
   fieldName: 'createUser',
   newOutputName: 'user',
   outputsToNest: ['id', 'username']
-})
+});
 ```
 
 For example, This would rewrite the following mutation:
 
-```
+```graphql
 mutation createUser(input: CreateUserInput!) {
   createUser(input: $input) {
     id
@@ -338,7 +341,7 @@ mutation createUser(input: CreateUserInput!) {
 
 and turn it into:
 
-```
+```graphql
 mutation createUser(input: CreateUserInput!) {
   createUser(input: $input) {
     user {
@@ -348,6 +351,100 @@ mutation createUser(input: CreateUserInput!) {
   }
 }
 ```
+
+## Restricting Matches Further
+
+Sometimes you need more control over which fields get rewritten to avoid accidentally rewriting fields which happen to have the same name in an unrelated query. This can be accomplished by providing a list of `matchConditions` to the `RewriteHandler`. There are 3 built-in match condition helpers you can use to make this easier, specifically `fragmentMatchCondition`, `queryMatchCondition`, and `mutationMatchCondition`. If any of the conditions passed in to `matchConditions` match, then the rewriter will proceed as normal.
+
+For example, to restrict matches to only to the `title` field of fragments named `thingFragment`, on type `Thing`, we could use the following `matchConditions`:
+
+```js
+import { fragmentMatchCondition, ScalarFieldToObjectFieldRewriter } from 'graphql-query-rewriter';
+
+const rewriter = new ScalarFieldToObjectFieldRewriter({
+  fieldName: 'title',
+  objectFieldName: 'text',
+  matchConditions: [
+    fragmentMatchCondition({
+      fragmentNames: ['thingFragment'],
+      fragmentTypes: ['Thing']
+    })
+  ]
+});
+```
+
+Then, this will rewrite the following query as follows:
+
+```graphql
+query {
+  articles {
+    title # <- This will not get rewritten, it doesn't match the matchConditions
+    things {
+      ...thingFragment
+    }
+  }
+}
+
+fragment thingFragment on Thing {
+  id
+  title # <- This will be rewritten, because it matches the matchConditions
+}
+```
+
+You can also pass a `pathRegexes` array of regexes to `fragmentMatchCondition` if you'd like to restrict the path to the object field within the fragment that you'd like to rewrite. For example:
+
+```js
+const rewriter = new ScalarFieldToObjectFieldRewriter({
+  fieldName: 'title',
+  objectFieldName: 'text',
+  matchConditions: [
+    fragmentMatchCondition({
+      // rewrite only at exatly path innerThing.title
+      pathRegexes: [/^innerThing.title$/]
+    })
+  ]
+});
+```
+
+Then, this will rewrite the query below as follows:
+
+```graphql
+query {
+  things {
+    ...parentThingFragment
+  }
+}
+
+fragment parentThingFragment on Thing {
+  id
+  title # <- not rewritten, it's not at the correct path
+  innerThing {
+    title # <- This will be rewritten, it's at path innerThing.title
+  }
+}
+```
+
+There are also `queryMatchCondition` and `mutationMatchCondition`. These work similarly to `fragmentMatchCondition`, except they match only fields directly inside of a query or a mutation, respectively.
+All of these matches take `pathRegexes` to search for matching paths, but `queryMatchCondition` can also take `queryNames`, to match only named queries, and likewise `mutationMatchCondition` can take `mutationNames` to match named mutations.
+
+If there are multiple `matchConditions` provided, then if any of the conditions match then the rewriter will continue as normal. For example:
+
+```js
+const rewriter = new ScalarFieldToObjectFieldRewriter({
+  fieldName: 'title',
+  objectFieldName: 'text',
+  matchConditions: [
+    fragmentMatchCondition({
+      fragmentNames: ['thingFragment']
+    }),
+    queryMatchCondition({
+      queryNames: ['getThing', 'getOtherThing']
+    })
+  ]
+});
+```
+
+The above rewriter will only match on fragments named `thingFragment`, or queries named `getThing` or `getOtherThing`.
 
 ## Current Limitations
 
