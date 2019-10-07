@@ -391,7 +391,7 @@ fragment thingFragment on Thing {
 }
 ```
 
-You can also pass a `pathRegexes` array of regexes to `fragmentMatchCondition` if you'd like to restrict the specific to the object field within the fragment that you'd like to rewrite. For example:
+You can also pass a `pathRegexes` array of regexes to `fragmentMatchCondition` if you'd like to restrict the path to the object field within the fragment that you'd like to rewrite. For example:
 
 ```js
 const rewriter = new ScalarFieldToObjectFieldRewriter({
@@ -399,6 +399,7 @@ const rewriter = new ScalarFieldToObjectFieldRewriter({
   objectFieldName: 'text',
   matchConditions: [
     fragmentMatchCondition({
+      // rewrite only at exatly path innerThing.title
       pathRegexes: [/^innerThing.title$/]
     })
   ]
