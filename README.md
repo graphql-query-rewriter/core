@@ -444,6 +444,8 @@ const rewriter = new ScalarFieldToObjectFieldRewriter({
 });
 ```
 
+The above rewriter will only match on fragments named `thingFragment`, or queries named `getThing` or `getOtherThing`.
+
 ## Current Limitations
 
 Currently GraphQL Query Rewriter can only work with a single operation per query, and cannot properly handle aliased fields. These limitations should hopefully be fixed soon. Contributions are welcome!
