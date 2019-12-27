@@ -298,6 +298,81 @@ query getUser(id: ID!) {
 }
 ```
 
+### JsonToTypedObjectRewriter
+
+`JsonToTypedObjectRewriter` can be used to rewrite a field that previously is just freeform JSON into a typed graphQL field with proper selections and subseelctions. For example, imagine there's a `user` query with type JSON, like `user: { type: GraphQLJSON }`. However, we'd like to improve our API by properly typing the fields within `user` using a graphQL type named `User` with fields `id`, `name`, `isAdmin`, etc.... For example, we have:
+
+```graphql
+query {
+  user
+}
+```
+
+and we want to change it to
+
+```graphql
+query {
+  user {
+    id
+    name
+    isAdmin
+  }
+}
+```
+
+we can make this change with the following rewriter:
+
+```js
+import { JsonToTypedObjectRewriter } from 'graphql-query-rewriter';
+
+// add this to the rewriters array in graphqlRewriterMiddleware(...)
+const rewriter = new JsonToTypedObjectRewriter({
+  fieldName: 'user',
+  objectFields: [
+    { name: 'id' },
+    { name: 'name' },
+    { name: 'isAdmin' },
+  ]
+});
+```
+
+This rewriter also supports rewriting subfields recursively by adding a `subfields` array inside of an object field. For example, the rewriter below:
+
+```js
+import { JsonToTypedObjectRewriter } from 'graphql-query-rewriter';
+
+// add this to the rewriters array in graphqlRewriterMiddleware(...)
+const rewriter = new JsonToTypedObjectRewriter({
+  fieldName: 'user',
+  objectFields: [
+    { name: 'id' },
+    { name: 'name' },
+    {
+      name: 'posts'
+      subfields: [
+        { name: 'id' },
+        { name: 'title' },
+      ]
+    },
+  ]
+});
+```
+
+would rewrite `query { user }` into:
+
+```graphql
+query {
+  user {
+    id
+    name
+    posts {
+      id
+      title
+    }
+  }
+}
+```
+
 ### NestFieldOutputsRewriter
 
 `NestFieldOutputsRewriter` can be used to move mutation outputs into a nested payload object. It's a best-practice for each mutation in GraphQL to have its own output type, and it's required by the [Relay GraphQL Spec](https://facebook.github.io/relay/docs/en/graphql-server-specification.html#mutations). For example, to migrate the mutation `createUser(input: CreateUserInput!): User!` to a mutation with a proper output payload type like:

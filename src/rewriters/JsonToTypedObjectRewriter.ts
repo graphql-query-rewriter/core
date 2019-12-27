@@ -4,7 +4,7 @@ import Rewriter, { RewriterOpts } from './Rewriter';
 
 interface ObjectField {
   name: string;
-  subFields?: ObjectField[];
+  subfields?: ObjectField[];
 }
 
 interface JsonToTypedObjectRewriterOpts extends RewriterOpts {
@@ -44,11 +44,11 @@ export default class JsonToTypedObjectRewriter extends Rewriter {
   private generateSelectionSet(fields: ObjectField[]): SelectionSetNode {
     return {
       kind: 'SelectionSet',
-      selections: fields.map(({ name, subFields }) => ({
+      selections: fields.map(({ name, subfields }) => ({
         kind: 'Field',
         name: { kind: 'Name', value: name },
-        ...(subFields && {
-          selectionSet: this.generateSelectionSet(subFields)
+        ...(subfields && {
+          selectionSet: this.generateSelectionSet(subfields)
         })
       }))
     } as SelectionSetNode;
