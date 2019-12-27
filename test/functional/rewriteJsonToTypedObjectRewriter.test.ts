@@ -49,12 +49,12 @@ describe('Rewrite query for GraphQLJSON field to be a query for a nested object 
         objectFields: [
           {
             name: 'user',
-            subFields: [
+            subfields: [
               { name: 'userId' },
               { name: 'userHandle' },
               {
                 name: 'item',
-                subFields: [{ name: 'itemMeta' }]
+                subfields: [{ name: 'itemMeta' }]
               }
             ]
           }
@@ -146,12 +146,12 @@ describe('Rewrite query for GraphQLJSON field to be a query for a nested object 
         objectFields: [
           {
             name: 'user',
-            subFields: [
+            subfields: [
               { name: 'userId' },
               { name: 'userHandle' },
               {
                 name: 'item',
-                subFields: [{ name: 'itemMeta' }]
+                subfields: [{ name: 'itemMeta' }]
               }
             ]
           }
