@@ -4,3 +4,4 @@ export { default as FieldArgsToInputTypeRewriter } from './FieldArgsToInputTypeR
 export { default as FieldArgTypeRewriter } from './FieldArgTypeRewriter';
 export { default as NestFieldOutputsRewriter } from './NestFieldOutputsRewriter';
 export { default as ScalarFieldToObjectFieldRewriter } from './ScalarFieldToObjectFieldRewriter';
+export { default as JsonToTypedObjectRewriter } from './JsonToTypedObjectRewriter';
