@@ -13,18 +13,29 @@ describe('Rewrite a field name on a node', () => {
     ]);
 
     const query = gqlFmt`
-      query person {
-        title
+      query getPerson {
+        person {
+          title
+        }
       }
     `;
 
     const expectedQuery = gqlFmt`
-      query person {
-        newTitle
+      query getPerson {
+        person {
+          newTitle
+        }
       }
     `;
 
     expect(handler.rewriteRequest(query)).toEqual({ query: expectedQuery });
+    expect(
+      handler.rewriteResponse({
+        person: { newTitle: 'Boss Baby ' }
+      })
+    ).toEqual({
+      person: { title: 'Boss Baby ' }
+    });
   });
 
   it('supports nested renames', () => {
