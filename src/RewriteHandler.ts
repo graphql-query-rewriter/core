@@ -12,8 +12,9 @@ interface RewriterMatch {
  * This class handles rewriting the query and the reponse according to the rewriters passed in
  */
 export default class RewriteHandler {
+  public matches: RewriterMatch[] = [];
+
   private rewriters: Rewriter[];
-  private matches: RewriterMatch[] = [];
   private hasProcessedRequest: boolean = false;
   private hasProcessedResponse: boolean = false;
 
