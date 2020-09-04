@@ -16,13 +16,13 @@ describe('ast utils', () => {
           moreThings: [{ type: 'dog' }, { type: 'cat' }, { type: 'lion' }]
         }
       };
-      expect(rewriteResultsAtPath(obj, ['thing1', 'moreThings', 'type'], elm => elm + '!')).toEqual(
-        {
-          thing1: {
-            moreThings: [{ type: 'dog!' }, { type: 'cat!' }, { type: 'lion!' }]
-          }
+      expect(
+        rewriteResultsAtPath(obj, ['thing1', 'moreThings', 'type'], (elm, path) => elm[path] + '!')
+      ).toEqual({
+        thing1: {
+          moreThings: [{ type: 'dog!' }, { type: 'cat!' }, { type: 'lion!' }]
         }
-      );
+      });
     });
 
     it("doesn't include null or undefined results", () => {
@@ -49,20 +49,23 @@ describe('ast utils', () => {
           }
         ]
       };
-      expect(rewriteResultsAtPath(obj, ['things', 'moreThings', 'type'], elm => elm + '!')).toEqual(
-        {
-          things: [
-            {
-              moreThings: [{ type: 'dog!' }, { type: 'cat!' }]
-            },
-            {
-              moreThings: [{ type: 'bear!' }, { type: 'cat!' }]
-            }
-          ]
-        }
-      );
       expect(
-        rewriteResultsAtPath(obj, ['things', 'moreThings'], elm => ({ ...elm, meh: '7' }))
+        rewriteResultsAtPath(obj, ['things', 'moreThings', 'type'], (elm, path) => elm[path] + '!')
+      ).toEqual({
+        things: [
+          {
+            moreThings: [{ type: 'dog!' }, { type: 'cat!' }]
+          },
+          {
+            moreThings: [{ type: 'bear!' }, { type: 'cat!' }]
+          }
+        ]
+      });
+      expect(
+        rewriteResultsAtPath(obj, ['things', 'moreThings'], (elm, path) => ({
+          ...elm[path],
+          meh: '7'
+        }))
       ).toEqual({
         things: [
           {

@@ -48,12 +48,15 @@ class ScalarFieldToObjectFieldRewriter extends Rewriter {
     } as NodeAndVarDefs;
   }
 
-  public rewriteResponse(response: any) {
+  public rewriteResponse(response: any, path: string) {
+    const pathResponse = super.rewriteResponse(response, path);
+
     if (typeof response === 'object') {
       // undo the nesting in the response so it matches the original query
-      return response[this.objectFieldName];
+      return pathResponse[this.objectFieldName];
     }
-    return response;
+
+    return pathResponse;
   }
 }
 
