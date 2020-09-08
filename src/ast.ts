@@ -261,24 +261,38 @@ interface ResultObj {
 export const rewriteResultsAtPath = (
   results: ResultObj,
   path: ReadonlyArray<string>,
-  callback: (resultsAtPath: any) => any
+  callback: (parentResult: any, key: string | number) => any
 ): ResultObj => {
-  if (path.length === 0) return callback(results);
+  if (path.length === 0) return results;
+
   const curPathElm = path[0];
-  const remainingPath = path.slice(1);
   const newResults = { ...results };
   const curResults = results[curPathElm];
+
+  if (path.length === 1) {
+    if (Array.isArray(curResults)) {
+      newResults[curPathElm] = curResults.map((_, index) => {
+        const newValue = callback(curResults, index);
+        return newValue;
+      });
+    } else {
+      newResults[curPathElm] = callback(results, curPathElm);
+    }
+
+    return newResults;
+  }
+
+  const remainingPath = path.slice(1);
   // if the path stops here, just return results without any rewriting
   if (curResults === undefined || curResults === null) return results;
 
   if (Array.isArray(curResults)) {
-    newResults[curPathElm] = curResults.reduce((acc, resultElm) => {
-      const elmResults = rewriteResultsAtPath(resultElm, remainingPath, callback);
-      return acc.concat(elmResults);
-    }, []);
-    return newResults;
+    newResults[curPathElm] = curResults.map(result =>
+      rewriteResultsAtPath(result, remainingPath, callback)
+    );
+  } else {
+    newResults[curPathElm] = rewriteResultsAtPath(curResults, remainingPath, callback);
   }
 
-  newResults[curPathElm] = rewriteResultsAtPath(curResults, remainingPath, callback);
   return newResults;
 };
