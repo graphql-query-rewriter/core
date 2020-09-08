@@ -261,7 +261,7 @@ interface ResultObj {
 export const rewriteResultsAtPath = (
   results: ResultObj,
   path: ReadonlyArray<string>,
-  callback: (parentResult: any, path: string | number) => any
+  callback: (parentResult: any, key: string | number) => any
 ): ResultObj => {
   if (path.length === 0) return results;
 

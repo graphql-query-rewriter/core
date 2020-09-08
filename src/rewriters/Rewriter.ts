@@ -56,8 +56,8 @@ abstract class Rewriter {
     return variables;
   }
 
-  public rewriteResponse(response: any, path: string | number): any {
-    return response[path];
+  public rewriteResponse(response: any, key: string | number): any {
+    return response[key];
   }
 }
 
