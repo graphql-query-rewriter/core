@@ -271,15 +271,13 @@ export const rewriteResultsAtPath = (
 
   if (path.length === 1) {
     if (Array.isArray(curResults)) {
-      newResults[curPathElm] = curResults.map((_, index) => {
+      return curResults.map((_, index) => {
         const newValue = callback(curResults, index);
         return newValue;
       });
-    } else {
-      newResults[curPathElm] = callback(results, curPathElm);
     }
 
-    return newResults;
+    return callback(results, curPathElm);
   }
 
   const remainingPath = path.slice(1);

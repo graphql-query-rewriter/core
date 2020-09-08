@@ -49,14 +49,14 @@ class ScalarFieldToObjectFieldRewriter extends Rewriter {
   }
 
   public rewriteResponse(response: any, key: string | number) {
-    const pathResponse = super.rewriteResponse(response, key);
-
     if (typeof response === 'object') {
+      const pathResponse = response[key];
+
       // undo the nesting in the response so it matches the original query
-      return pathResponse[this.objectFieldName];
+      response[key] = pathResponse[this.objectFieldName];
     }
 
-    return pathResponse;
+    return response;
   }
 }
 
