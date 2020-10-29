@@ -275,11 +275,11 @@ export const rewriteResultsAtPath = (
         const newValue = callback(curResults, index);
         return newValue;
       });
-    } else {
-      newResults[curPathElm] = callback(results, curPathElm);
+
+      return newResults;
     }
 
-    return newResults;
+    return callback(results, curPathElm);
   }
 
   const remainingPath = path.slice(1);
