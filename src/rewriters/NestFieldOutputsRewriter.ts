@@ -76,7 +76,11 @@ class NestFieldOutputsRewriter extends Rewriter {
       ) {
         const rewrittenResponse = { ...pathResponse, ...pathResponse[this.newOutputName] };
         delete rewrittenResponse[this.newOutputName];
-        response[key] = rewrittenResponse;
+
+        return {
+          ...response,
+          [key]: rewrittenResponse
+        };
       }
     }
 

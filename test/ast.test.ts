@@ -17,10 +17,10 @@ describe('ast utils', () => {
         }
       };
       expect(
-        rewriteResultsAtPath(obj, ['thing1', 'moreThings', 'type'], (elm, path) => {
-          elm[path] = elm[path] + '!';
-          return elm;
-        })
+        rewriteResultsAtPath(obj, ['thing1', 'moreThings', 'type'], (elm, path) => ({
+          ...elm,
+          [path]: elm[path] + '!'
+        }))
       ).toEqual({
         thing1: {
           moreThings: [{ type: 'dog!' }, { type: 'cat!' }, { type: 'lion!' }]
@@ -53,10 +53,10 @@ describe('ast utils', () => {
         ]
       };
       expect(
-        rewriteResultsAtPath(obj, ['things', 'moreThings', 'type'], (elm, path) => {
-          elm[path] = elm[path] + '!';
-          return elm;
-        })
+        rewriteResultsAtPath(obj, ['things', 'moreThings', 'type'], (elm, path) => ({
+          ...elm,
+          [path]: elm[path] + '!'
+        }))
       ).toEqual({
         things: [
           {

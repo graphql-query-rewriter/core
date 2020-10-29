@@ -53,7 +53,10 @@ class ScalarFieldToObjectFieldRewriter extends Rewriter {
       const pathResponse = response[key];
 
       // undo the nesting in the response so it matches the original query
-      response[key] = pathResponse[this.objectFieldName];
+      return {
+        ...response,
+        [key]: pathResponse[this.objectFieldName]
+      };
     }
 
     return response;
