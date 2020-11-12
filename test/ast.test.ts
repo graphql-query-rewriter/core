@@ -68,10 +68,10 @@ describe('ast utils', () => {
         ]
       });
       expect(
-        rewriteResultsAtPath(obj, ['things', 'moreThings'], (elm, path) => ({
-          ...elm[path],
-          meh: '7'
-        }))
+        rewriteResultsAtPath(obj, ['things', 'moreThings'], (elm, path, index) => {
+          elm[path][index!] = { ...elm[path][index!], meh: '7' };
+          return elm;
+        })
       ).toEqual({
         things: [
           {

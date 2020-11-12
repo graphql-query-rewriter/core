@@ -261,7 +261,7 @@ interface ResultObj {
 export const rewriteResultsAtPath = (
   results: ResultObj,
   path: ReadonlyArray<string>,
-  callback: (parentResult: any, key: string | number) => any
+  callback: (parentResult: any, key: string, position?: number) => any
 ): ResultObj => {
   if (path.length === 0) return results;
 
@@ -271,12 +271,10 @@ export const rewriteResultsAtPath = (
 
   if (path.length === 1) {
     if (Array.isArray(curResults)) {
-      newResults[curPathElm] = curResults.map((_, index) => {
-        const newValue = callback(curResults, index);
-        return newValue;
-      });
-
-      return newResults;
+      return curResults.reduce(
+        (reducedResults, _, index) => callback(reducedResults, curPathElm, index),
+        results
+      );
     }
 
     return callback(results, curPathElm);

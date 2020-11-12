@@ -56,7 +56,57 @@ abstract class Rewriter {
     return variables;
   }
 
-  public rewriteResponse(response: any, key: string | number): any {
+  /*
+   * Receives the parent object of the matched field with the key of the matched field.
+   * For arrays, the index of the element is also present.
+   */
+  public rewriteResponse(response: any, key: string, index?: number): any {
+    return response;
+  }
+
+  /*
+   * Helper that extracts the element from the response if possible otherwise returns null.
+   */
+  protected extractReponseElement(response: any, key: string, index?: number): any {
+    // Verify the response format
+    let element = null;
+    if (response === null || typeof response !== 'object') return element;
+
+    // Extract the key
+    element = response[key] || null;
+
+    // Extract the position
+    if (Array.isArray(element)) {
+      element = element[index!] || null;
+    }
+
+    return element;
+  }
+
+  /*
+   * Helper that rewrite the element from the response if possible and returns the response.
+   */
+  protected rewriteResponseElement(
+    response: any,
+    newElement: any,
+    key: string,
+    index?: number
+  ): any {
+    // Verify the response format
+    if (response === null || typeof response !== 'object') return response;
+
+    // Extract the key
+    let element = response[key];
+
+    // Extract the position
+    // NOTE: We might eventually want to create an array if one is not present at the key
+    // and we receive an index in input
+    if (Array.isArray(element)) {
+      element[index!] = newElement;
+    } else {
+      response[key] = newElement;
+    }
+
     return response;
   }
 }
