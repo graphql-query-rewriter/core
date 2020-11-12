@@ -72,8 +72,10 @@ export default class RewriteHandler {
     let rewrittenResponse = response;
     this.matches.reverse().forEach(({ rewriter, paths }) => {
       paths.forEach(path => {
-        rewrittenResponse = rewriteResultsAtPath(rewrittenResponse, path, (parentResponse, key) =>
-          rewriter.rewriteResponse(parentResponse, key)
+        rewrittenResponse = rewriteResultsAtPath(
+          rewrittenResponse,
+          path,
+          (parentResponse, key, index) => rewriter.rewriteResponse(parentResponse, key, index)
         );
       });
     });

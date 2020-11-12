@@ -65,23 +65,17 @@ class NestFieldOutputsRewriter extends Rewriter {
     } as NodeAndVarDefs;
   }
 
-  public rewriteResponse(response: any, key: string | number) {
-    const pathResponse = response[key];
+  public rewriteResponse(response: any, key: string, index?: number) {
+    // Extract the element we are working on
+    const element = super.extractReponseElement(response, key, index);
+    if (element === null || typeof element !== 'object') return response;
 
-    if (typeof pathResponse === 'object') {
-      // undo the nesting in the response so it matches the original query
-      if (
-        pathResponse[this.newOutputName] &&
-        typeof pathResponse[this.newOutputName] === 'object'
-      ) {
-        const rewrittenResponse = { ...pathResponse, ...pathResponse[this.newOutputName] };
-        delete rewrittenResponse[this.newOutputName];
+    // Undo the nesting in the response so it matches the original query
+    if (element[this.newOutputName] && typeof element[this.newOutputName] === 'object') {
+      const newElement = { ...element, ...element[this.newOutputName] };
+      delete newElement[this.newOutputName];
 
-        return {
-          ...response,
-          [key]: rewrittenResponse
-        };
-      }
+      return super.rewriteResponseElement(response, newElement, key, index);
     }
 
     return response;

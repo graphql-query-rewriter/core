@@ -2,7 +2,7 @@ import RewriteHandler from '../../src/RewriteHandler';
 import NestFieldOutputsRewriter from '../../src/rewriters/NestFieldOutputsRewriter';
 import { gqlFmt } from '../testUtils';
 
-describe('Rewrite field args to input type', () => {
+describe('Rewrite output fields inside of a new output object', () => {
   it('allows nesting the args provided into an input type', () => {
     const handler = new RewriteHandler([
       new NestFieldOutputsRewriter({
@@ -100,6 +100,60 @@ describe('Rewrite field args to input type', () => {
         name: 'jack',
         executionTime: 10
       }
+    });
+  });
+
+  it('allows nesting the args provided in an array', () => {
+    const handler = new RewriteHandler([
+      new NestFieldOutputsRewriter({
+        fieldName: 'createCats',
+        newOutputName: 'cat',
+        outputsToNest: ['name', 'color', 'id']
+      })
+    ]);
+    const query = gqlFmt`
+      mutation createManyCats {
+        createCats {
+          id
+          name
+          color
+        }
+      }
+    `;
+    const expectedRewritenQuery = gqlFmt`
+      mutation createManyCats {
+        createCats {
+          cat {
+            id
+            name
+            color
+          }
+        }
+      }
+    `;
+    expect(handler.rewriteRequest(query)).toEqual({
+      query: expectedRewritenQuery
+    });
+    expect(
+      handler.rewriteResponse({
+        createCats: [
+          {
+            cat: {
+              id: 1,
+              name: 'jack',
+              color: 'blue'
+            }
+          }
+        ]
+      })
+    ).toEqual({
+      createCats: [
+        {
+          id: 1,
+          name: 'jack',
+          color: 'blue'
+        }
+      ]
     });
   });
 });

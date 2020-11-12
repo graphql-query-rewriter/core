@@ -7,7 +7,7 @@ interface ScalarFieldToObjectFieldRewriterOpts extends RewriterOpts {
 }
 
 /**
- * Rewriter which nests output fields inside of a new output object
+ * Rewriter which nests a scalar field inside of a new output object
  * ex: change from `field { subField }` to `field { subField { objectfield } }`
  */
 class ScalarFieldToObjectFieldRewriter extends Rewriter {
@@ -48,18 +48,14 @@ class ScalarFieldToObjectFieldRewriter extends Rewriter {
     } as NodeAndVarDefs;
   }
 
-  public rewriteResponse(response: any, key: string | number) {
-    if (typeof response === 'object') {
-      const pathResponse = response[key];
+  public rewriteResponse(response: any, key: string, index?: number) {
+    // Extract the element we are working on
+    const element = super.extractReponseElement(response, key, index);
+    if (element === null) return response;
 
-      // undo the nesting in the response so it matches the original query
-      return {
-        ...response,
-        [key]: pathResponse[this.objectFieldName]
-      };
-    }
-
-    return response;
+    // Undo the nesting in the response so it matches the original query
+    const newElement = element[this.objectFieldName];
+    return super.rewriteResponseElement(response, newElement, key, index);
   }
 }
 
