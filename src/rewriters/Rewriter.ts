@@ -96,7 +96,7 @@ abstract class Rewriter {
     if (response === null || typeof response !== 'object') return response;
 
     // Extract the key
-    let element = response[key];
+    const element = response[key];
 
     // Extract the position
     // NOTE: We might eventually want to create an array if one is not present at the key
