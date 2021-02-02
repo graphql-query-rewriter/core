@@ -109,6 +109,23 @@ abstract class Rewriter {
 
     return response;
   }
+
+  protected deleteResponseElement(response: any, key: string, index?: number): any {
+    // Verify the response format
+    if (response === null || typeof response !== 'object') return response;
+
+    // Extract the key
+    const element = response[key];
+
+    // Extract the position
+    if (Array.isArray(element)) {
+      element.splice(index!, 1);
+    } else {
+      delete response[key];
+    }
+
+    return response;
+  }
 }
 
 export default Rewriter;
