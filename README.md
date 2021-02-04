@@ -531,7 +531,7 @@ GraphQL Query Rewriter is released under a [MIT License](https://opensource.org/
 
 ## Sponsors
 
-Sponsored by [EF Hello](https://www.hello.ef.com/)
+Sponsored by [<img src="https://assets.hello.ef.com/icons/logo-04022021.png" height="50" alt="EF Hello" />](https://www.hello.ef.com/)
 
 ## Contributing
 
