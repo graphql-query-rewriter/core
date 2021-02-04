@@ -529,6 +529,10 @@ Currently GraphQL Query Rewriter can only work with a single operation per query
 
 GraphQL Query Rewriter is released under a [MIT License](https://opensource.org/licenses/MIT).
 
+## Sponsors
+
+Sponsored by [EF Hello](https://www.hello.ef.com/)
+
 ## Contributing
 
 Contributions are welcome! These steps will guide you through contributing to this project:
