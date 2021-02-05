@@ -1,0 +1,6 @@
+{
+  "name": "GraphQL Query Rewriter",
+  "entryPoints": "src",
+  "out": "docs",
+  "theme": "minimal"
+}
