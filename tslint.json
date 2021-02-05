@@ -1,9 +1,0 @@
-{
-  "extends": ["tslint:recommended", "tslint-config-airbnb", "tslint-config-prettier"],
-  "rules": {
-    "interface-name": false,
-    "object-literal-sort-keys": false,
-    "no-increment-decrement": false,
-    "prefer-array-literal": [true, { "allow-type-parameters": true }]
-  }
-}

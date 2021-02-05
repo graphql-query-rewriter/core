@@ -8,8 +8,8 @@ describe('Rewrite output fields inside of a new output object', () => {
       new NestFieldOutputsRewriter({
         fieldName: 'createCat',
         newOutputName: 'cat',
-        outputsToNest: ['name', 'color', 'id']
-      })
+        outputsToNest: ['name', 'color', 'id'],
+      }),
     ]);
 
     const query = gqlFmt`
@@ -34,7 +34,7 @@ describe('Rewrite output fields inside of a new output object', () => {
     `;
     expect(handler.rewriteRequest(query, { name: 'jack' })).toEqual({
       query: expectedRewritenQuery,
-      variables: { name: 'jack' }
+      variables: { name: 'jack' },
     });
     expect(
       handler.rewriteResponse({
@@ -42,16 +42,16 @@ describe('Rewrite output fields inside of a new output object', () => {
           cat: {
             id: 1,
             name: 'jack',
-            color: 'blue'
-          }
-        }
+            color: 'blue',
+          },
+        },
       })
     ).toEqual({
       createCat: {
         id: 1,
         name: 'jack',
-        color: 'blue'
-      }
+        color: 'blue',
+      },
     });
   });
 
@@ -60,8 +60,8 @@ describe('Rewrite output fields inside of a new output object', () => {
       new NestFieldOutputsRewriter({
         fieldName: 'createCat',
         newOutputName: 'cat',
-        outputsToNest: ['name', 'color', 'id']
-      })
+        outputsToNest: ['name', 'color', 'id'],
+      }),
     ]);
 
     const query = gqlFmt`
@@ -84,22 +84,22 @@ describe('Rewrite output fields inside of a new output object', () => {
     `;
     expect(handler.rewriteRequest(query, { name: 'jack' })).toEqual({
       query: expectedRewritenQuery,
-      variables: { name: 'jack' }
+      variables: { name: 'jack' },
     });
     expect(
       handler.rewriteResponse({
         createCat: {
           cat: {
-            name: 'jack'
+            name: 'jack',
           },
-          executionTime: 10
-        }
+          executionTime: 10,
+        },
       })
     ).toEqual({
       createCat: {
         name: 'jack',
-        executionTime: 10
-      }
+        executionTime: 10,
+      },
     });
   });
 
@@ -108,8 +108,8 @@ describe('Rewrite output fields inside of a new output object', () => {
       new NestFieldOutputsRewriter({
         fieldName: 'createCats',
         newOutputName: 'cat',
-        outputsToNest: ['name', 'color', 'id']
-      })
+        outputsToNest: ['name', 'color', 'id'],
+      }),
     ]);
     const query = gqlFmt`
       mutation createManyCats {
@@ -132,7 +132,7 @@ describe('Rewrite output fields inside of a new output object', () => {
       }
     `;
     expect(handler.rewriteRequest(query)).toEqual({
-      query: expectedRewritenQuery
+      query: expectedRewritenQuery,
     });
     expect(
       handler.rewriteResponse({
@@ -141,19 +141,19 @@ describe('Rewrite output fields inside of a new output object', () => {
             cat: {
               id: 1,
               name: 'jack',
-              color: 'blue'
-            }
-          }
-        ]
+              color: 'blue',
+            },
+          },
+        ],
       })
     ).toEqual({
       createCats: [
         {
           id: 1,
           name: 'jack',
-          color: 'blue'
-        }
-      ]
+          color: 'blue',
+        },
+      ],
     });
   });
 });

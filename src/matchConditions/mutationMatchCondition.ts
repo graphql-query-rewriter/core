@@ -7,12 +7,12 @@ export interface MutationMatchConditionOpts {
 
 const mutationMatchCondition = ({
   mutationNames,
-  pathRegexes
+  pathRegexes,
 }: MutationMatchConditionOpts = {}): matchCondition => {
   return operationMatchCondition({
     pathRegexes,
     operationNames: mutationNames,
-    operationTypes: ['mutation']
+    operationTypes: ['mutation'],
   });
 };
 

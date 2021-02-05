@@ -12,10 +12,10 @@ describe('query match condition', () => {
           objectFieldName: 'text',
           matchConditions: [
             mutationMatchCondition({
-              mutationNames: ['matchingName1', 'matchingName2']
-            })
-          ]
-        })
+              mutationNames: ['matchingName1', 'matchingName2'],
+            }),
+          ],
+        }),
       ]);
 
     const noMutation = gqlFmt`
@@ -37,7 +37,7 @@ describe('query match condition', () => {
       }
     `;
     expect(createHandler().rewriteRequest(wrongNameMutation)).toEqual({
-      query: wrongNameMutation
+      query: wrongNameMutation,
     });
 
     const matchingMutation = gqlFmt`
@@ -57,7 +57,7 @@ describe('query match condition', () => {
       }
     `;
     expect(createHandler().rewriteRequest(matchingMutation)).toEqual({
-      query: expectedRewrittenMatchingMutation
+      query: expectedRewrittenMatchingMutation,
     });
   });
 
@@ -67,8 +67,8 @@ describe('query match condition', () => {
         new ScalarFieldToObjectFieldRewriter({
           fieldName: 'title',
           objectFieldName: 'text',
-          matchConditions: [mutationMatchCondition()]
-        })
+          matchConditions: [mutationMatchCondition()],
+        }),
       ]);
 
     const noMutation = gqlFmt`
@@ -99,7 +99,7 @@ describe('query match condition', () => {
       }
     `;
     expect(createHandler().rewriteRequest(matchingMutation)).toEqual({
-      query: expectedRewrittenMatchingMutation
+      query: expectedRewrittenMatchingMutation,
     });
   });
 
@@ -111,10 +111,10 @@ describe('query match condition', () => {
           objectFieldName: 'text',
           matchConditions: [
             mutationMatchCondition({
-              pathRegexes: [/^thingField.title$/]
-            })
-          ]
-        })
+              pathRegexes: [/^thingField.title$/],
+            }),
+          ],
+        }),
       ]);
 
     const nonMatchingPathFragment = gqlFmt`
@@ -125,7 +125,7 @@ describe('query match condition', () => {
       }
     `;
     expect(createHandler().rewriteRequest(nonMatchingPathFragment)).toEqual({
-      query: nonMatchingPathFragment
+      query: nonMatchingPathFragment,
     });
 
     const matchingMutation = gqlFmt`
@@ -145,7 +145,7 @@ describe('query match condition', () => {
       }
     `;
     expect(createHandler().rewriteRequest(matchingMutation)).toEqual({
-      query: expectedRewrittenMatchingMutation
+      query: expectedRewrittenMatchingMutation,
     });
   });
 });

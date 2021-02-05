@@ -13,7 +13,7 @@ export interface OperationMatchConditionOpts {
 export default ({
   operationNames,
   operationTypes,
-  pathRegexes
+  pathRegexes,
 }: OperationMatchConditionOpts = {}): matchCondition => {
   return ({ node }, parents) => {
     const operationDef = parents.find(({ kind }) => kind === 'OperationDefinition') as
@@ -34,7 +34,7 @@ export default ({
 
     if (pathRegexes) {
       const pathStr = extractPath([...parents, node]).join('.');
-      if (!pathRegexes.find(pathRegex => pathRegex.test(pathStr))) {
+      if (!pathRegexes.find((pathRegex) => pathRegex.test(pathStr))) {
         return false;
       }
     }

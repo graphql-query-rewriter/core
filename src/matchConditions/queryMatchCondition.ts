@@ -7,12 +7,12 @@ export interface QueryMatchConditionOpts {
 
 const queryMatchCondition = ({
   queryNames,
-  pathRegexes
+  pathRegexes,
 }: QueryMatchConditionOpts = {}): matchCondition => {
   return operationMatchCondition({
     pathRegexes,
     operationNames: queryNames,
-    operationTypes: ['query']
+    operationTypes: ['query'],
   });
 };
 

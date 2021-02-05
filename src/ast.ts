@@ -61,7 +61,7 @@ export class FragmentTracer {
     fragmentName: string,
     pathWithinFragment: ReadonlyArray<string>
   ): ReadonlyArray<ReadonlyArray<string>> {
-    return this.getPathsToFragment(fragmentName).map(path => [...path, ...pathWithinFragment]);
+    return this.getPathsToFragment(fragmentName).map((path) => [...path, ...pathWithinFragment]);
   }
 
   private getFragmentDefs(): ReadonlyArray<FragmentDefinitionNode> {
@@ -125,7 +125,7 @@ export class FragmentTracer {
   }
 
   private buildFragmentPathMap(): FragmentPathMap {
-    const mainOperation = this.doc.definitions.find(node => node.kind === 'OperationDefinition');
+    const mainOperation = this.doc.definitions.find((node) => node.kind === 'OperationDefinition');
     if (!mainOperation) return {};
 
     // partial paths are the paths inside of each fragmnt to other fragments
@@ -151,7 +151,7 @@ export class FragmentTracer {
       )) {
         fragmentPathMap[mergedFragmentName] = [
           ...(fragmentPathMap[mergedFragmentName] || []),
-          ...mergedFragmentPaths
+          ...mergedFragmentPaths,
         ];
       }
     }
@@ -183,11 +183,11 @@ export const rewriteDoc = (
       if (key === 'loc') continue;
       const val = (node as any)[key];
       if (Array.isArray(val)) {
-        (node as any)[key] = val.map(elm => {
+        (node as any)[key] = val.map((elm) => {
           if (typeof elm === 'object') {
             const next: NodeAndVarDefs = {
               variableDefinitions,
-              node: elm
+              node: elm,
             };
             return walkRecursive(next, nextParents);
           }
@@ -196,7 +196,7 @@ export const rewriteDoc = (
       } else if (typeof val === 'object') {
         const next: NodeAndVarDefs = {
           variableDefinitions,
-          node: val
+          node: val,
         };
         (node as any)[key] = walkRecursive(next, nextParents);
       }
@@ -206,7 +206,7 @@ export const rewriteDoc = (
 
   const root: NodeAndVarDefs = {
     variableDefinitions,
-    node: doc
+    node: doc,
   };
   const rewrittenDoc = walkRecursive(root, []) as DocumentNode;
   return replaceVariableDefinitions(rewrittenDoc, variableDefinitions);
@@ -229,7 +229,7 @@ export const replaceVariableDefinitions = (
   doc: DocumentNode,
   variableDefinitions: ReadonlyArray<VariableDefinitionNode>
 ): DocumentNode => {
-  const definitions = doc.definitions.map(def => {
+  const definitions = doc.definitions.map((def) => {
     if (def.kind === 'OperationDefinition') {
       return { ...def, variableDefinitions };
     }
@@ -244,7 +244,7 @@ export const replaceVariableDefinitions = (
 /** @hidden */
 export const extractPath = (parents: ReadonlyArray<ASTNode>): ReadonlyArray<string> => {
   const path: string[] = [];
-  parents.forEach(parent => {
+  parents.forEach((parent) => {
     if (parent.kind === 'Field') {
       path.push(parent.name.value);
     }
@@ -285,7 +285,7 @@ export const rewriteResultsAtPath = (
   if (curResults === undefined || curResults === null) return results;
 
   if (Array.isArray(curResults)) {
-    newResults[curPathElm] = curResults.map(result =>
+    newResults[curPathElm] = curResults.map((result) =>
       rewriteResultsAtPath(result, remainingPath, callback)
     );
   } else {

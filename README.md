@@ -1,6 +1,6 @@
 # GraphQL Query Rewriter
 
-[![CircleCI](https://circleci.com/gh/ef-eng/graphql-query-rewriter/tree/master.svg?style=shield)](https://circleci.com/gh/ef-eng/graphql-query-rewriter/tree/master)
+[![CircleCI](https://circleci.com/gh/graphql-query-rewriter/core/tree/master.svg?style=shield)](https://circleci.com/gh/ef-eng/graphql-query-rewriter/tree/master)
 [![Coverage Status](https://coveralls.io/repos/github/chanind/graphql-query-rewriter/badge.svg?branch=master)](https://coveralls.io/github/ef-eng/graphql-query-rewriter?branch=master)
 [![npm](https://badgen.net/npm/v/graphql-query-rewriter)](https://www.npmjs.com/package/graphql-query-rewriter)
 [![license](https://badgen.net/npm/license/graphql-query-rewriter)](https://opensource.org/licenses/MIT)

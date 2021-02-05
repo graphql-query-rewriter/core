@@ -36,7 +36,7 @@ class FieldArgTypeRewriter extends Rewriter {
     if (node.kind !== 'Field') return false;
     if (node.name.value !== this.fieldName || !node.arguments) return false;
     // is there an argument with the correct name and type in a variable?
-    const matchingArgument = node.arguments.find(arg => arg.name.value === this.argName);
+    const matchingArgument = node.arguments.find((arg) => arg.name.value === this.argName);
     if (!matchingArgument || matchingArgument.value.kind !== 'Variable') return false;
     const varRef = matchingArgument.value.name.value;
 
@@ -51,7 +51,7 @@ class FieldArgTypeRewriter extends Rewriter {
 
   public rewriteQuery({ node, variableDefinitions }: NodeAndVarDefs) {
     const varRefName = this.extractMatchingVarRefName(node as FieldNode);
-    const newVarDefs = variableDefinitions.map(varDef => {
+    const newVarDefs = variableDefinitions.map((varDef) => {
       if (varDef.variable.name.value !== varRefName) return varDef;
       return { ...varDef, type: this.newTypeNode };
     });
@@ -65,7 +65,7 @@ class FieldArgTypeRewriter extends Rewriter {
   }
 
   private extractMatchingVarRefName(node: FieldNode) {
-    const matchingArgument = (node.arguments || []).find(arg => arg.name.value === this.argName);
+    const matchingArgument = (node.arguments || []).find((arg) => arg.name.value === this.argName);
     return ((matchingArgument as ArgumentNode).value as VariableNode).name.value;
   }
 }

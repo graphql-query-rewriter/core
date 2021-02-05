@@ -8,8 +8,8 @@ describe('Rewrite field arg name', () => {
       new FieldArgNameRewriter({
         fieldName: 'things',
         oldArgName: 'otherThingID',
-        newArgName: 'otherThingId'
-      })
+        newArgName: 'otherThingId',
+      }),
     ]);
 
     const query = gqlFmt`
@@ -40,7 +40,7 @@ describe('Rewrite field arg name', () => {
     `;
     expect(handler.rewriteRequest(query)).toEqual({
       query: expectedRewritenQuery,
-      variables: undefined
+      variables: undefined,
     });
   });
 
@@ -49,8 +49,8 @@ describe('Rewrite field arg name', () => {
       new FieldArgNameRewriter({
         fieldName: 'things',
         oldArgName: 'otherThingID',
-        newArgName: 'otherThingId'
-      })
+        newArgName: 'otherThingId',
+      }),
     ]);
 
     const query = gqlFmt`
@@ -69,7 +69,7 @@ describe('Rewrite field arg name', () => {
     `;
     expect(handler.rewriteRequest(query)).toEqual({
       query: expectedRewritenQuery,
-      variables: undefined
+      variables: undefined,
     });
   });
 });

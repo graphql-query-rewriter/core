@@ -41,7 +41,7 @@ abstract class Rewriter {
     }
     if (
       this.matchConditions &&
-      !this.matchConditions.find(condition => condition(nodeAndVarDefs, parents))
+      !this.matchConditions.find((condition) => condition(nodeAndVarDefs, parents))
     ) {
       return false;
     }

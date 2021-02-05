@@ -7,8 +7,8 @@ describe('Rewrite query for GraphQLJSON field to be a query for a nested object 
     const handler = new RewriteHandler([
       new JsonToTypedObjectRewriter({
         fieldName: 'thingJSON',
-        objectFields: [{ name: 'title' }, { name: 'description' }]
-      })
+        objectFields: [{ name: 'title' }, { name: 'description' }],
+      }),
     ]);
 
     const query = gqlFmt`
@@ -38,7 +38,7 @@ describe('Rewrite query for GraphQLJSON field to be a query for a nested object 
     `;
 
     expect(handler.rewriteRequest(query)).toEqual({
-      query: expectedRewrittenQuery
+      query: expectedRewrittenQuery,
     });
   });
 
@@ -54,12 +54,12 @@ describe('Rewrite query for GraphQLJSON field to be a query for a nested object 
               { name: 'userHandle' },
               {
                 name: 'item',
-                subfields: [{ name: 'itemMeta' }]
-              }
-            ]
-          }
-        ]
-      })
+                subfields: [{ name: 'itemMeta' }],
+              },
+            ],
+          },
+        ],
+      }),
     ]);
 
     const query = gqlFmt`
@@ -94,7 +94,7 @@ describe('Rewrite query for GraphQLJSON field to be a query for a nested object 
     `;
 
     expect(handler.rewriteRequest(query)).toEqual({
-      query: expectedRewrittenQuery
+      query: expectedRewrittenQuery,
     });
   });
 
@@ -102,8 +102,8 @@ describe('Rewrite query for GraphQLJSON field to be a query for a nested object 
     const handler = new RewriteHandler([
       new JsonToTypedObjectRewriter({
         fieldName: 'thingJSON',
-        objectFields: [{ name: 'title' }, { name: 'description' }]
-      })
+        objectFields: [{ name: 'title' }, { name: 'description' }],
+      }),
     ]);
 
     const query = gqlFmt`
@@ -135,7 +135,7 @@ describe('Rewrite query for GraphQLJSON field to be a query for a nested object 
     `;
 
     expect(handler.rewriteRequest(query)).toEqual({
-      query: expectedRewrittenQuery
+      query: expectedRewrittenQuery,
     });
   });
 
@@ -151,12 +151,12 @@ describe('Rewrite query for GraphQLJSON field to be a query for a nested object 
               { name: 'userHandle' },
               {
                 name: 'item',
-                subfields: [{ name: 'itemMeta' }]
-              }
-            ]
-          }
-        ]
-      })
+                subfields: [{ name: 'itemMeta' }],
+              },
+            ],
+          },
+        ],
+      }),
     ]);
 
     const query = gqlFmt`
@@ -217,7 +217,7 @@ describe('Rewrite query for GraphQLJSON field to be a query for a nested object 
     `;
 
     expect(handler.rewriteRequest(query)).toEqual({
-      query: expectedRewritenQuery
+      query: expectedRewritenQuery,
     });
   });
 });

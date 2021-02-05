@@ -29,14 +29,14 @@ class NestFieldOutputsRewriter extends Rewriter {
     // if `newOutputName` already exists as an output, skip it
     if (
       node.selectionSet.selections.find(
-        output => output.kind === 'Field' && output.name.value === this.newOutputName
+        (output) => output.kind === 'Field' && output.name.value === this.newOutputName
       )
     ) {
       return false;
     }
     // is there an output with a matching name?
     return !!node.selectionSet.selections.find(
-      output => output.kind === 'Field' && this.outputsToNest.indexOf(output.name.value) >= 0
+      (output) => output.kind === 'Field' && this.outputsToNest.indexOf(output.name.value) >= 0
     );
   }
 
@@ -45,23 +45,23 @@ class NestFieldOutputsRewriter extends Rewriter {
     const { variableDefinitions } = nodeAndVarDefs;
     if (!node.selectionSet) return nodeAndVarDefs;
     const outputsToNest = (node.selectionSet.selections || []).filter(
-      output => output.kind === 'Field' && this.outputsToNest.indexOf(output.name.value) >= 0
+      (output) => output.kind === 'Field' && this.outputsToNest.indexOf(output.name.value) >= 0
     );
     const newOutputs = (node.selectionSet.selections || []).filter(
-      output => output.kind === 'Field' && this.outputsToNest.indexOf(output.name.value) === -1
+      (output) => output.kind === 'Field' && this.outputsToNest.indexOf(output.name.value) === -1
     );
     const nestedOutput: FieldNode = {
       kind: 'Field',
       name: { kind: 'Name', value: this.newOutputName },
       selectionSet: {
         kind: 'SelectionSet',
-        selections: outputsToNest
-      }
+        selections: outputsToNest,
+      },
     };
     newOutputs.push(nestedOutput);
     return {
       variableDefinitions,
-      node: { ...node, selectionSet: { ...node.selectionSet, selections: newOutputs } }
+      node: { ...node, selectionSet: { ...node.selectionSet, selections: newOutputs } },
     } as NodeAndVarDefs;
   }
 

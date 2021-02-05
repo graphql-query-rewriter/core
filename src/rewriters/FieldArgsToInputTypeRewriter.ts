@@ -13,7 +13,7 @@ interface FieldArgsToInputTypeRewriterOpts extends RewriterOpts {
  */
 class FieldArgsToInputTypeRewriter extends Rewriter {
   protected argNames: string[];
-  protected inputArgName: string = 'input';
+  protected inputArgName = 'input';
 
   constructor(options: FieldArgsToInputTypeRewriterOpts) {
     super(options);
@@ -28,19 +28,19 @@ class FieldArgsToInputTypeRewriter extends Rewriter {
     // is this a field with the correct fieldName and arguments?
     if (node.name.value !== this.fieldName || !node.arguments) return false;
     // if there's already an input type in this field, skip it
-    if (node.arguments.find(arg => arg.name.value === this.inputArgName)) {
+    if (node.arguments.find((arg) => arg.name.value === this.inputArgName)) {
       return false;
     }
     // is there an argument with the correct name?
-    return !!node.arguments.find(arg => this.argNames.indexOf(arg.name.value) >= 0);
+    return !!node.arguments.find((arg) => this.argNames.indexOf(arg.name.value) >= 0);
   }
 
   public rewriteQuery({ node, variableDefinitions }: NodeAndVarDefs) {
     const argsToNest = ((node as FieldNode).arguments || []).filter(
-      argument => this.argNames.indexOf(argument.name.value) >= 0
+      (argument) => this.argNames.indexOf(argument.name.value) >= 0
     );
     const newArguments = ((node as FieldNode).arguments || []).filter(
-      argument => this.argNames.indexOf(argument.name.value) === -1
+      (argument) => this.argNames.indexOf(argument.name.value) === -1
     );
     const inputArgument: ArgumentNode = {
       kind: 'Argument',
@@ -51,10 +51,10 @@ class FieldArgsToInputTypeRewriter extends Rewriter {
           (arg): ObjectFieldNode => ({
             kind: 'ObjectField',
             name: arg.name,
-            value: arg.value
+            value: arg.value,
           })
-        )
-      }
+        ),
+      },
     };
     newArguments.push(inputArgument);
     return { variableDefinitions, node: { ...node, arguments: newArguments } } as NodeAndVarDefs;

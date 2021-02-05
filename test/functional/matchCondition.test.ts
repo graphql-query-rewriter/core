@@ -12,13 +12,13 @@ describe('matchCondition', () => {
           objectFieldName: 'text',
           matchConditions: [
             queryMatchCondition({
-              queryNames: ['queryName1', 'queryName2']
+              queryNames: ['queryName1', 'queryName2'],
             }),
             mutationMatchCondition({
-              mutationNames: ['mutationName1', 'mutationName2']
-            })
-          ]
-        })
+              mutationNames: ['mutationName1', 'mutationName2'],
+            }),
+          ],
+        }),
       ]);
 
     const wrongNameQuery = gqlFmt`
@@ -29,7 +29,7 @@ describe('matchCondition', () => {
       }
     `;
     expect(createHandler().rewriteRequest(wrongNameQuery)).toEqual({
-      query: wrongNameQuery
+      query: wrongNameQuery,
     });
 
     const matchingQuery = gqlFmt`
@@ -49,7 +49,7 @@ describe('matchCondition', () => {
       }
     `;
     expect(createHandler().rewriteRequest(matchingQuery)).toEqual({
-      query: expectedRewrittenMatchingQuery
+      query: expectedRewrittenMatchingQuery,
     });
 
     const matchingMutation = gqlFmt`
@@ -69,7 +69,7 @@ describe('matchCondition', () => {
       }
     `;
     expect(createHandler().rewriteRequest(matchingMutation)).toEqual({
-      query: expectedRewrittenMatchingMutation
+      query: expectedRewrittenMatchingMutation,
     });
   });
 });

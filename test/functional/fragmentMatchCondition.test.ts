@@ -13,10 +13,10 @@ describe('fragment match condition', () => {
           matchConditions: [
             fragmentMatchCondition({
               fragmentNames: ['matchingName1', 'matchingName2'],
-              fragmentTypes: ['Thingy']
-            })
-          ]
-        })
+              fragmentTypes: ['Thingy'],
+            }),
+          ],
+        }),
       ]);
 
     const noFragmentQuery = gqlFmt`
@@ -42,7 +42,7 @@ describe('fragment match condition', () => {
       }
     `;
     expect(createHandler().rewriteRequest(wrongFragmentNameQuery)).toEqual({
-      query: wrongFragmentNameQuery
+      query: wrongFragmentNameQuery,
     });
 
     const wrongFragmentTypeQuery = gqlFmt`
@@ -57,7 +57,7 @@ describe('fragment match condition', () => {
       }
     `;
     expect(createHandler().rewriteRequest(wrongFragmentTypeQuery)).toEqual({
-      query: wrongFragmentTypeQuery
+      query: wrongFragmentTypeQuery,
     });
 
     const matchingFragmentQuery = gqlFmt`
@@ -85,7 +85,7 @@ describe('fragment match condition', () => {
       }
     `;
     expect(createHandler().rewriteRequest(matchingFragmentQuery)).toEqual({
-      query: expectedRewrittenMatchingFragmentQuery
+      query: expectedRewrittenMatchingFragmentQuery,
     });
   });
 
@@ -95,8 +95,8 @@ describe('fragment match condition', () => {
         new ScalarFieldToObjectFieldRewriter({
           fieldName: 'title',
           objectFieldName: 'text',
-          matchConditions: [fragmentMatchCondition()]
-        })
+          matchConditions: [fragmentMatchCondition()],
+        }),
       ]);
 
     const noFragmentQuery = gqlFmt`
@@ -135,7 +135,7 @@ describe('fragment match condition', () => {
       }
     `;
     expect(createHandler().rewriteRequest(matchingFragmentQuery)).toEqual({
-      query: expectedRewrittenMatchingFragmentQuery
+      query: expectedRewrittenMatchingFragmentQuery,
     });
   });
 
@@ -147,10 +147,10 @@ describe('fragment match condition', () => {
           objectFieldName: 'text',
           matchConditions: [
             fragmentMatchCondition({
-              pathRegexes: [/^thingField.title$/]
-            })
-          ]
-        })
+              pathRegexes: [/^thingField.title$/],
+            }),
+          ],
+        }),
       ]);
 
     const nonMatchingPathFragment = gqlFmt`
@@ -165,7 +165,7 @@ describe('fragment match condition', () => {
       }
     `;
     expect(createHandler().rewriteRequest(nonMatchingPathFragment)).toEqual({
-      query: nonMatchingPathFragment
+      query: nonMatchingPathFragment,
     });
 
     const matchingFragmentQuery = gqlFmt`
@@ -197,7 +197,7 @@ describe('fragment match condition', () => {
       }
     `;
     expect(createHandler().rewriteRequest(matchingFragmentQuery)).toEqual({
-      query: expectedRewrittenMatchingFragmentQuery
+      query: expectedRewrittenMatchingFragmentQuery,
     });
   });
 });

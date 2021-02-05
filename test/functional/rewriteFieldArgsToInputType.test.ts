@@ -7,8 +7,8 @@ describe('Rewrite field args to input type', () => {
     const handler = new RewriteHandler([
       new FieldArgsToInputTypeRewriter({
         fieldName: 'things',
-        argNames: ['arg1', 'arg2']
-      })
+        argNames: ['arg1', 'arg2'],
+      }),
     ]);
 
     const query = gqlFmt`
@@ -27,7 +27,7 @@ describe('Rewrite field args to input type', () => {
     `;
     expect(handler.rewriteRequest(query)).toEqual({
       query: expectedRewritenQuery,
-      variables: undefined
+      variables: undefined,
     });
   });
 
@@ -35,8 +35,8 @@ describe('Rewrite field args to input type', () => {
     const handler = new RewriteHandler([
       new FieldArgsToInputTypeRewriter({
         fieldName: 'things',
-        argNames: ['arg1', 'arg2']
-      })
+        argNames: ['arg1', 'arg2'],
+      }),
     ]);
 
     const query = gqlFmt`
@@ -55,7 +55,7 @@ describe('Rewrite field args to input type', () => {
     `;
     expect(handler.rewriteRequest(query)).toEqual({
       query: expectedRewritenQuery,
-      variables: undefined
+      variables: undefined,
     });
   });
 
@@ -64,8 +64,8 @@ describe('Rewrite field args to input type', () => {
       new FieldArgsToInputTypeRewriter({
         fieldName: 'things',
         inputArgName: 'submission',
-        argNames: ['arg1', 'arg2']
-      })
+        argNames: ['arg1', 'arg2'],
+      }),
     ]);
 
     const query = gqlFmt`
@@ -84,7 +84,7 @@ describe('Rewrite field args to input type', () => {
     `;
     expect(handler.rewriteRequest(query)).toEqual({
       query: expectedRewritenQuery,
-      variables: undefined
+      variables: undefined,
     });
   });
 
@@ -92,8 +92,8 @@ describe('Rewrite field args to input type', () => {
     const handler = new RewriteHandler([
       new FieldArgsToInputTypeRewriter({
         fieldName: 'things',
-        argNames: ['arg1', 'arg2']
-      })
+        argNames: ['arg1', 'arg2'],
+      }),
     ]);
 
     const query = gqlFmt`
@@ -106,7 +106,7 @@ describe('Rewrite field args to input type', () => {
     const expectedRewritenQuery = query;
     expect(handler.rewriteRequest(query)).toEqual({
       query: expectedRewritenQuery,
-      variables: undefined
+      variables: undefined,
     });
   });
 });

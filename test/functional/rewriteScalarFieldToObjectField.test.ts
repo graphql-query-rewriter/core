@@ -7,8 +7,8 @@ describe('Rewrite scalar field to be a nested object with a single scalar field'
     const handler = new RewriteHandler([
       new ScalarFieldToObjectFieldRewriter({
         fieldName: 'title',
-        objectFieldName: 'text'
-      })
+        objectFieldName: 'text',
+      }),
     ]);
 
     const query = gqlFmt`
@@ -36,7 +36,7 @@ describe('Rewrite scalar field to be a nested object with a single scalar field'
       }
     `;
     expect(handler.rewriteRequest(query)).toEqual({
-      query: expectedRewritenQuery
+      query: expectedRewritenQuery,
     });
     expect(
       handler.rewriteResponse({
@@ -44,20 +44,20 @@ describe('Rewrite scalar field to be a nested object with a single scalar field'
           thingField: {
             id: 1,
             title: {
-              text: 'THING'
+              text: 'THING',
             },
-            color: 'blue'
-          }
-        }
+            color: 'blue',
+          },
+        },
       })
     ).toEqual({
       theThing: {
         thingField: {
           id: 1,
           title: 'THING',
-          color: 'blue'
-        }
-      }
+          color: 'blue',
+        },
+      },
     });
   });
 
@@ -65,8 +65,8 @@ describe('Rewrite scalar field to be a nested object with a single scalar field'
     const handler = new RewriteHandler([
       new ScalarFieldToObjectFieldRewriter({
         fieldName: 'title',
-        objectFieldName: 'text'
-      })
+        objectFieldName: 'text',
+      }),
     ]);
 
     const query = gqlFmt`
@@ -96,22 +96,22 @@ describe('Rewrite scalar field to be a nested object with a single scalar field'
       }
     `;
     expect(handler.rewriteRequest(query)).toEqual({
-      query: expectedRewritenQuery
+      query: expectedRewritenQuery,
     });
     expect(
       handler.rewriteResponse({
         theThing: {
           id: 1,
           title: {
-            text: 'THING'
-          }
-        }
+            text: 'THING',
+          },
+        },
       })
     ).toEqual({
       theThing: {
         id: 1,
-        title: 'THING'
-      }
+        title: 'THING',
+      },
     });
   });
 
@@ -119,8 +119,8 @@ describe('Rewrite scalar field to be a nested object with a single scalar field'
     const handler = new RewriteHandler([
       new ScalarFieldToObjectFieldRewriter({
         fieldName: 'title',
-        objectFieldName: 'text'
-      })
+        objectFieldName: 'text',
+      }),
     ]);
 
     const query = gqlFmt`
@@ -174,15 +174,15 @@ describe('Rewrite scalar field to be a nested object with a single scalar field'
       }
     `;
     expect(handler.rewriteRequest(query)).toEqual({
-      query: expectedRewritenQuery
+      query: expectedRewritenQuery,
     });
     expect(
       handler.rewriteResponse({
         theThing: {
           id: 1,
           title: {
-            text: 'THING'
-          }
+            text: 'THING',
+          },
         },
         otherThing: {
           id: 3,
@@ -190,40 +190,40 @@ describe('Rewrite scalar field to be a nested object with a single scalar field'
             {
               node: {
                 title: {
-                  text: 'NODE_TEXT1'
-                }
-              }
+                  text: 'NODE_TEXT1',
+                },
+              },
             },
             {
               node: {
                 title: {
-                  text: 'NODE_TEXT2'
-                }
-              }
-            }
-          ]
-        }
+                  text: 'NODE_TEXT2',
+                },
+              },
+            },
+          ],
+        },
       })
     ).toEqual({
       theThing: {
         id: 1,
-        title: 'THING'
+        title: 'THING',
       },
       otherThing: {
         id: 3,
         edges: [
           {
             node: {
-              title: 'NODE_TEXT1'
-            }
+              title: 'NODE_TEXT1',
+            },
           },
           {
             node: {
-              title: 'NODE_TEXT2'
-            }
-          }
-        ]
-      }
+              title: 'NODE_TEXT2',
+            },
+          },
+        ],
+      },
     });
   });
 
@@ -231,8 +231,8 @@ describe('Rewrite scalar field to be a nested object with a single scalar field'
     const handler = new RewriteHandler([
       new ScalarFieldToObjectFieldRewriter({
         fieldName: 'titles',
-        objectFieldName: 'text'
-      })
+        objectFieldName: 'text',
+      }),
     ]);
 
     const query = gqlFmt`
@@ -252,22 +252,22 @@ describe('Rewrite scalar field to be a nested object with a single scalar field'
       }
     `;
     expect(handler.rewriteRequest(query)).toEqual({
-      query: expectedRewritenQuery
+      query: expectedRewritenQuery,
     });
     expect(
       handler.rewriteResponse({
         thing: {
           titles: [
             {
-              text: 'THING'
-            }
-          ]
-        }
+              text: 'THING',
+            },
+          ],
+        },
       })
     ).toEqual({
       thing: {
-        titles: ['THING']
-      }
+        titles: ['THING'],
+      },
     });
   });
 });
