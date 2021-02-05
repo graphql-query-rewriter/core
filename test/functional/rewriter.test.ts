@@ -57,7 +57,7 @@ describe('rewriter', () => {
       const response = { [key]: 1 };
 
       expect(rewriter.rewriteResponseElement(response, newElement, key)).toEqual({
-        [key]: newElement
+        [key]: newElement,
       });
     });
 
@@ -67,7 +67,7 @@ describe('rewriter', () => {
       const response = { [key]: [1] };
 
       expect(rewriter.rewriteResponseElement(response, newElement, key, 0)).toEqual({
-        [key]: [newElement]
+        [key]: [newElement],
       });
     });
 
@@ -79,7 +79,7 @@ describe('rewriter', () => {
       expect(rewriter.rewriteResponseElement('string', newElement, key)).toEqual('string');
       expect(rewriter.rewriteResponseElement({ a: 1 }, newElement, key)).toEqual({
         a: 1,
-        [key]: newElement
+        [key]: newElement,
       });
     });
   });

@@ -1,18 +1,14 @@
 {
   "compilerOptions": {
-    "moduleResolution": "node",
-    "target": "es5",
-    "module": "es2015",
-    "lib": ["es2015", "es2016", "es2017", "dom", "esnext.asynciterable"],
+    "lib": ["esnext", "esnext.asynciterable"],
+    "module": "commonjs",
+    "target": "es2018",
     "strict": true,
+    "esModuleInterop": true,
     "sourceMap": true,
-    "declaration": true,
-    "allowSyntheticDefaultImports": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "declarationDir": "dist/types",
-    "outDir": "dist/lib",
-    "typeRoots": ["node_modules/@types"]
+    "noImplicitAny": false,
+    "outDir": "dist",
+    "declaration": true
   },
-  "include": ["src"]
+  "exclude": ["node_modules", "dist"]
 }

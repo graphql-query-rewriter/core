@@ -10,7 +10,7 @@ export interface FragmentMatchConditionOpts {
 const fragmentMatchCondition = ({
   fragmentNames,
   fragmentTypes,
-  pathRegexes
+  pathRegexes,
 }: FragmentMatchConditionOpts = {}): matchCondition => {
   return ({ node }, parents) => {
     const fragmentDef = parents.find(({ kind }) => kind === 'FragmentDefinition') as
@@ -28,7 +28,7 @@ const fragmentMatchCondition = ({
 
     if (pathRegexes) {
       const pathStr = extractPath([...parents, node]).join('.');
-      if (!pathRegexes.find(pathRegex => pathRegex.test(pathStr))) {
+      if (!pathRegexes.find((pathRegex) => pathRegex.test(pathStr))) {
         return false;
       }
     }

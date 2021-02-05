@@ -37,7 +37,7 @@ export default class JsonToTypedObjectRewriter extends Rewriter {
 
     return {
       variableDefinitions,
-      node: { ...node, selectionSet }
+      node: { ...node, selectionSet },
     } as NodeAndVarDefs;
   }
 
@@ -48,9 +48,9 @@ export default class JsonToTypedObjectRewriter extends Rewriter {
         kind: 'Field',
         name: { kind: 'Name', value: name },
         ...(subfields && {
-          selectionSet: this.generateSelectionSet(subfields)
-        })
-      }))
+          selectionSet: this.generateSelectionSet(subfields),
+        }),
+      })),
     } as SelectionSetNode;
   }
 }

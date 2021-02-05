@@ -9,8 +9,8 @@ describe('Rewrite field arg type', () => {
         fieldName: 'things',
         argName: 'identifier',
         oldType: 'String!',
-        newType: 'Int!'
-      })
+        newType: 'Int!',
+      }),
     ]);
 
     const query = gqlFmt`
@@ -41,20 +41,20 @@ describe('Rewrite field arg type', () => {
     `;
     expect(handler.rewriteRequest(query)).toEqual({
       query: expectedRewritenQuery,
-      variables: undefined
+      variables: undefined,
     });
     const response = {
       things: {
         cat: 'meh',
         dog: [
           {
-            catDog: '123'
-          }
-        ]
+            catDog: '123',
+          },
+        ],
       },
       otherThing: {
-        otherThingField: 18
-      }
+        otherThingField: 18,
+      },
     };
     // shouldn't modify the response
     expect(handler.rewriteResponse(response)).toEqual(response);
@@ -86,15 +86,15 @@ describe('Rewrite field arg type', () => {
         argName: 'identifier',
         oldType: 'String!',
         newType: 'Int!',
-        coerceVariable: val => parseInt(val, 10)
-      })
+        coerceVariable: (val) => parseInt(val, 10),
+      }),
     ]);
     expect(handler.rewriteRequest(query, { arg1: '123', arg2: 'blah' })).toEqual({
       query: expectedRewritenQuery,
       variables: {
         arg1: 123,
-        arg2: 'blah'
-      }
+        arg2: 'blah',
+      },
     });
   });
 
@@ -124,15 +124,15 @@ describe('Rewrite field arg type', () => {
         argName: 'identifier',
         oldType: 'String!',
         newType: 'Int!',
-        coerceVariable: val => parseInt(val, 10)
-      })
+        coerceVariable: (val) => parseInt(val, 10),
+      }),
     ]);
     expect(handler.rewriteRequest(query, { arg1: '123', arg2: 'blah' })).toEqual({
       query: expectedRewritenQuery,
       variables: {
         arg1: 123,
-        arg2: 'blah'
-      }
+        arg2: 'blah',
+      },
     });
   });
 });

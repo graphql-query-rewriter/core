@@ -27,11 +27,11 @@ class FieldArgNameRewriter extends Rewriter {
     // is this a field with the correct arguments?
     if (!node.arguments) return false;
     // is there an argument with the correct name?
-    return !!node.arguments.find(arg => arg.name.value === this.oldArgName);
+    return !!node.arguments.find((arg) => arg.name.value === this.oldArgName);
   }
 
   public rewriteQuery({ node, variableDefinitions }: NodeAndVarDefs) {
-    const newArguments = ((node as FieldNode).arguments || []).map(argument => {
+    const newArguments = ((node as FieldNode).arguments || []).map((argument) => {
       if (argument.name.value === this.oldArgName) {
         return { ...argument, name: { ...argument.name, value: this.newArgName } };
       }

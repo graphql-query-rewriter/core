@@ -12,10 +12,10 @@ describe('query match condition', () => {
           objectFieldName: 'text',
           matchConditions: [
             queryMatchCondition({
-              queryNames: ['matchingName1', 'matchingName2']
-            })
-          ]
-        })
+              queryNames: ['matchingName1', 'matchingName2'],
+            }),
+          ],
+        }),
       ]);
 
     const noQuery = gqlFmt`
@@ -37,7 +37,7 @@ describe('query match condition', () => {
       }
     `;
     expect(createHandler().rewriteRequest(wrongNameQuery)).toEqual({
-      query: wrongNameQuery
+      query: wrongNameQuery,
     });
 
     const matchingQuery = gqlFmt`
@@ -57,7 +57,7 @@ describe('query match condition', () => {
       }
     `;
     expect(createHandler().rewriteRequest(matchingQuery)).toEqual({
-      query: expectedRewrittenMatchingQuery
+      query: expectedRewrittenMatchingQuery,
     });
   });
 
@@ -67,8 +67,8 @@ describe('query match condition', () => {
         new ScalarFieldToObjectFieldRewriter({
           fieldName: 'title',
           objectFieldName: 'text',
-          matchConditions: [queryMatchCondition()]
-        })
+          matchConditions: [queryMatchCondition()],
+        }),
       ]);
 
     const noQuery = gqlFmt`
@@ -99,7 +99,7 @@ describe('query match condition', () => {
       }
     `;
     expect(createHandler().rewriteRequest(matchingQuery)).toEqual({
-      query: expectedRewrittenMatchingQuery
+      query: expectedRewrittenMatchingQuery,
     });
   });
 
@@ -111,10 +111,10 @@ describe('query match condition', () => {
           objectFieldName: 'text',
           matchConditions: [
             queryMatchCondition({
-              pathRegexes: [/^thingField.title$/]
-            })
-          ]
-        })
+              pathRegexes: [/^thingField.title$/],
+            }),
+          ],
+        }),
       ]);
 
     const nonMatchingPathFragment = gqlFmt`
@@ -125,7 +125,7 @@ describe('query match condition', () => {
       }
     `;
     expect(createHandler().rewriteRequest(nonMatchingPathFragment)).toEqual({
-      query: nonMatchingPathFragment
+      query: nonMatchingPathFragment,
     });
 
     const matchingQuery = gqlFmt`
@@ -145,7 +145,7 @@ describe('query match condition', () => {
       }
     `;
     expect(createHandler().rewriteRequest(matchingQuery)).toEqual({
-      query: expectedRewrittenMatchingQuery
+      query: expectedRewrittenMatchingQuery,
     });
   });
 });

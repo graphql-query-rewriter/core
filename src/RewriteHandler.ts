@@ -15,8 +15,8 @@ export default class RewriteHandler {
   public matches: RewriterMatch[] = [];
 
   private rewriters: Rewriter[];
-  private hasProcessedRequest: boolean = false;
-  private hasProcessedResponse: boolean = false;
+  private hasProcessedRequest = false;
+  private hasProcessedResponse = false;
 
   constructor(rewriters: Rewriter[]) {
     this.rewriters = rewriters;
@@ -35,7 +35,7 @@ export default class RewriteHandler {
     let rewrittenVariables = variables;
     const rewrittenDoc = rewriteDoc(doc, (nodeAndVars, parents) => {
       let rewrittenNodeAndVars = nodeAndVars;
-      this.rewriters.forEach(rewriter => {
+      this.rewriters.forEach((rewriter) => {
         const isMatch = rewriter.matches(nodeAndVars, parents);
         if (isMatch) {
           rewrittenVariables = rewriter.rewriteVariables(rewrittenNodeAndVars, rewrittenVariables);
@@ -50,7 +50,7 @@ export default class RewriteHandler {
           }
           this.matches.push({
             rewriter,
-            paths
+            paths,
           });
         }
         return isMatch;
@@ -71,7 +71,7 @@ export default class RewriteHandler {
     this.hasProcessedResponse = true;
     let rewrittenResponse = response;
     this.matches.reverse().forEach(({ rewriter, paths }) => {
-      paths.forEach(path => {
+      paths.forEach((path) => {
         rewrittenResponse = rewriteResultsAtPath(
           rewrittenResponse,
           path,

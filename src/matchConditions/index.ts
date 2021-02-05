@@ -1,10 +1,10 @@
 export { default as matchCondition } from './matchCondition';
 export {
   default as fragmentMatchCondition,
-  FragmentMatchConditionOpts
+  FragmentMatchConditionOpts,
 } from './fragmentMatchCondition';
 export { default as queryMatchCondition, QueryMatchConditionOpts } from './queryMatchCondition';
 export {
   default as mutationMatchCondition,
-  MutationMatchConditionOpts
+  MutationMatchConditionOpts,
 } from './mutationMatchCondition';

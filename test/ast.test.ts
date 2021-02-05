@@ -5,7 +5,7 @@ import {
   nodesMatch,
   replaceVariableDefinitions,
   rewriteResultsAtPath,
-  FragmentTracer
+  FragmentTracer,
 } from '../src/ast';
 
 describe('ast utils', () => {
@@ -13,31 +13,31 @@ describe('ast utils', () => {
     it('rewrites the elements from within an object at the specified path', () => {
       const obj = {
         thing1: {
-          moreThings: [{ type: 'dog' }, { type: 'cat' }, { type: 'lion' }]
-        }
+          moreThings: [{ type: 'dog' }, { type: 'cat' }, { type: 'lion' }],
+        },
       };
       expect(
         rewriteResultsAtPath(obj, ['thing1', 'moreThings', 'type'], (elm, path) => ({
           ...elm,
-          [path]: elm[path] + '!'
+          [path]: elm[path] + '!',
         }))
       ).toEqual({
         thing1: {
-          moreThings: [{ type: 'dog!' }, { type: 'cat!' }, { type: 'lion!' }]
-        }
+          moreThings: [{ type: 'dog!' }, { type: 'cat!' }, { type: 'lion!' }],
+        },
       });
     });
 
     it("doesn't include null or undefined results", () => {
       const obj = {
         thing1: {
-          moreThings: [{ type: 'dog' }, { type: 'cat' }, { type: 'lion' }]
-        }
+          moreThings: [{ type: 'dog' }, { type: 'cat' }, { type: 'lion' }],
+        },
       };
       expect(rewriteResultsAtPath(obj, ['missing', 'otherMissing', 'bleh'], () => 'OMG!')).toEqual({
         thing1: {
-          moreThings: [{ type: 'dog' }, { type: 'cat' }, { type: 'lion' }]
-        }
+          moreThings: [{ type: 'dog' }, { type: 'cat' }, { type: 'lion' }],
+        },
       });
     });
 
@@ -45,27 +45,27 @@ describe('ast utils', () => {
       const obj = {
         things: [
           {
-            moreThings: [{ type: 'dog' }, { type: 'cat' }]
+            moreThings: [{ type: 'dog' }, { type: 'cat' }],
           },
           {
-            moreThings: [{ type: 'bear' }, { type: 'cat' }]
-          }
-        ]
+            moreThings: [{ type: 'bear' }, { type: 'cat' }],
+          },
+        ],
       };
       expect(
         rewriteResultsAtPath(obj, ['things', 'moreThings', 'type'], (elm, path) => ({
           ...elm,
-          [path]: elm[path] + '!'
+          [path]: elm[path] + '!',
         }))
       ).toEqual({
         things: [
           {
-            moreThings: [{ type: 'dog!' }, { type: 'cat!' }]
+            moreThings: [{ type: 'dog!' }, { type: 'cat!' }],
           },
           {
-            moreThings: [{ type: 'bear!' }, { type: 'cat!' }]
-          }
-        ]
+            moreThings: [{ type: 'bear!' }, { type: 'cat!' }],
+          },
+        ],
       });
       expect(
         rewriteResultsAtPath(obj, ['things', 'moreThings'], (elm, path, index) => {
@@ -75,12 +75,18 @@ describe('ast utils', () => {
       ).toEqual({
         things: [
           {
-            moreThings: [{ type: 'dog', meh: '7' }, { type: 'cat', meh: '7' }]
+            moreThings: [
+              { type: 'dog', meh: '7' },
+              { type: 'cat', meh: '7' },
+            ],
           },
           {
-            moreThings: [{ type: 'bear', meh: '7' }, { type: 'cat', meh: '7' }]
-          }
-        ]
+            moreThings: [
+              { type: 'bear', meh: '7' },
+              { type: 'cat', meh: '7' },
+            ],
+          },
+        ],
       });
     });
   });
@@ -92,18 +98,18 @@ describe('ast utils', () => {
         type: {
           kind: 'NamedType',
           name: { kind: 'Name', value: 'String', loc: { start: 10, end: 46 } },
-          loc: { start: 1, end: 61 }
+          loc: { start: 1, end: 61 },
         },
-        loc: { start: 0, end: 17 }
+        loc: { start: 0, end: 17 },
       };
       const node2: any = {
         kind: 'NonNullType',
         type: {
           kind: 'NamedType',
           name: { kind: 'Name', value: 'String', loc: { start: 0, end: 6 } },
-          loc: { start: 0, end: 6 }
+          loc: { start: 0, end: 6 },
         },
-        loc: { start: 0, end: 7 }
+        loc: { start: 0, end: 7 },
       };
       expect(nodesMatch(node1, node2)).toBe(true);
     });
@@ -114,18 +120,18 @@ describe('ast utils', () => {
         type: {
           kind: 'NamedType',
           name: { kind: 'Name', value: 'Int', loc: { start: 10, end: 46 } },
-          loc: { start: 1, end: 61 }
+          loc: { start: 1, end: 61 },
         },
-        loc: { start: 0, end: 17 }
+        loc: { start: 0, end: 17 },
       };
       const node2: any = {
         kind: 'NonNullType',
         type: {
           kind: 'NamedType',
           name: { kind: 'Name', value: 'String', loc: { start: 0, end: 6 } },
-          loc: { start: 0, end: 6 }
+          loc: { start: 0, end: 6 },
         },
-        loc: { start: 0, end: 7 }
+        loc: { start: 0, end: 7 },
       };
       expect(nodesMatch(node1, node2)).toBe(false);
     });
@@ -133,11 +139,11 @@ describe('ast utils', () => {
     it('return false if the nodes do not match due to different length array fields', () => {
       const node1: any = {
         kind: 'FakeField',
-        objects: [1, 2, 3]
+        objects: [1, 2, 3],
       };
       const node2: any = {
         kind: 'FakeField',
-        objects: [1, 2]
+        objects: [1, 2],
       };
       expect(nodesMatch(node1, node2)).toBe(false);
     });
@@ -145,11 +151,11 @@ describe('ast utils', () => {
     it('return false if the nodes do not match due to different objects in array fields', () => {
       const node1: any = {
         kind: 'FakeField',
-        objects: [{ man: 'bill' }]
+        objects: [{ man: 'bill' }],
       };
       const node2: any = {
         kind: 'FakeField',
-        objects: [{ man: 'jack' }]
+        objects: [{ man: 'jack' }],
       };
       expect(nodesMatch(node1, node2)).toBe(false);
     });
@@ -216,7 +222,7 @@ describe('ast utils', () => {
         (doc as any).definitions[0].selectionSet.selections[0].selectionSet.selections[0]
           .selectionSet.selections[0].selectionSet,
         (doc as any).definitions[0].selectionSet.selections[0].selectionSet.selections[0]
-          .selectionSet.selections[0].selectionSet.selections[0]
+          .selectionSet.selections[0].selectionSet.selections[0],
       ];
       expect(extractPath(parents)).toEqual(['thing1', 'thing2', 'thing3', 'thing4']);
     });
@@ -253,7 +259,7 @@ describe('ast utils', () => {
         ['thing1', 'thing2', 'thing3'],
         ['thing1', 'thing2'],
         ['thing1', 'thing3'],
-        ['thing1']
+        ['thing1'],
       ]);
     });
 

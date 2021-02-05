@@ -37,14 +37,14 @@ class ScalarFieldToObjectFieldRewriter extends Rewriter {
       selections: [
         {
           kind: 'Field',
-          name: { kind: 'Name', value: this.objectFieldName }
-        }
-      ]
+          name: { kind: 'Name', value: this.objectFieldName },
+        },
+      ],
     };
 
     return {
       variableDefinitions,
-      node: { ...node, selectionSet }
+      node: { ...node, selectionSet },
     } as NodeAndVarDefs;
   }
 

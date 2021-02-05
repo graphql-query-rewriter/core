@@ -1,0 +1,15 @@
+{
+  "extends": ["config:base"],
+  "timezone": "America/New_York",
+  "schedule": ["before 10am on Friday"],
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": "before 10am on Friday"
+  },
+  "packageRules": [
+    {
+      "updateTypes": ["minor", "patch", "pin", "digest"],
+      "automerge": true
+    }
+  ]
+}
