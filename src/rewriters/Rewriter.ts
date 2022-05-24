@@ -28,7 +28,8 @@ abstract class Rewriter {
 
   public matches(nodeAndVarDefs: NodeAndVarDefs, parents: ReadonlyArray<ASTNode>): boolean {
     const { node } = nodeAndVarDefs;
-    if (node.kind !== 'Field' || node.name.value !== this.fieldName) return false;
+    if (node.kind !== 'Field' || (node.name.value !== this.fieldName && !this.matchConditions))
+      return false;
     const root = parents[0];
     if (
       root.kind === 'OperationDefinition' &&
@@ -48,11 +49,11 @@ abstract class Rewriter {
     return true;
   }
 
-  public rewriteQuery(nodeAndVarDefs: NodeAndVarDefs): NodeAndVarDefs {
+  public rewriteQuery(nodeAndVarDefs: NodeAndVarDefs, _?: Variables): NodeAndVarDefs {
     return nodeAndVarDefs;
   }
 
-  public rewriteVariables(nodeAndVarDefs: NodeAndVarDefs, variables: Variables): Variables {
+  public rewriteVariables(_: NodeAndVarDefs, variables: Variables): Variables {
     return variables;
   }
 
