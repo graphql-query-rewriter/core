@@ -5,8 +5,11 @@ import {
   FieldNode,
   parseType,
   TypeNode,
-  VariableNode
+  VariableNode,
+  Kind,
+  isValueNode
 } from 'graphql';
+import Maybe from 'graphql/tsutils/Maybe';
 import { NodeAndVarDefs, nodesMatch } from '../ast';
 import { identifyFunc } from '../utils';
 import Rewriter, { RewriterOpts, Variables } from './Rewriter';
@@ -25,7 +28,7 @@ interface FieldArgTypeRewriterOpts extends RewriterOpts {
   coerceArgumentValue?: (
     variable: any,
     context: { variables: Variables; args: ArgumentNode[] }
-  ) => any;
+  ) => Maybe<ValueNode>;
 }
 
 /**
@@ -39,10 +42,16 @@ class FieldArgTypeRewriter extends Rewriter {
   // Passes context with rest of arguments and variables.
   // Quite useful for variable coercion that depends on other arguments/variables
   // (e.g., [offset, limit] to [pageSize, pageNumber] coercion)
-  protected coerceVariable;
+  protected coerceVariable: (
+    variable: any,
+    context: { variables: Variables; args: ArgumentNode[] }
+  ) => any;
   // (Experimental): Used to coerce arguments whose value
   // does not come in a variable.
-  protected coerceArgumentValue;
+  protected coerceArgumentValue: (
+    variable: any,
+    context: { variables: Variables; args: ArgumentNode[] }
+  ) => Maybe<ValueNode>;
 
   constructor(options: FieldArgTypeRewriterOpts) {
     super(options);
@@ -60,10 +69,9 @@ class FieldArgTypeRewriter extends Rewriter {
     // is this a field with the correct fieldName and arguments?
     if (node.kind !== 'Field') return false;
 
-    // If the fieldName doesnt match, but there are matchConditions.
-    // matchConditions should have higher priority than fieldName to determine a match.
-    if ((node.name.value !== this.fieldName && !this.matchConditions) || !node.arguments)
-      return false;
+    // does this field contain arguments?
+    if (!node.arguments) return false;
+
     // is there an argument with the correct name and type in a variable?
     const matchingArgument = node.arguments.find(arg => arg.name.value === this.argName);
 
@@ -81,8 +89,15 @@ class FieldArgTypeRewriter extends Rewriter {
     }
     // argument value comes in query doc.
     else {
-      const argRef = matchingArgument.value;
-      return nodesMatch(this.oldTypeNode, parseType(argRef.kind));
+      const argValueNode = matchingArgument.value;
+      return isValueNode(argValueNode);
+      // Would be ideal to do a nodesMatch in here, however argument value nodes
+      // have different format for their values than when passed as variables.
+      // For instance, are parsed with Kinds as "graphql.Kind" (e.g., INT="IntValue") and not "graphql.TokenKinds" (e.g., INT="Int")
+      // So they might not match correctly. Also they dont contain additional parsed syntax
+      // as the non-optional symbol "!". So just return true if the argument.value is a ValueNode.
+      //
+      // return nodesMatch(this.oldTypeNode, parseType(argRef.kind));
     }
 
     return false;
@@ -119,7 +134,7 @@ class FieldArgTypeRewriter extends Rewriter {
           Object.assign(matchingArgument, { value: newArgValue })
 
          */
-        Object.assign(matchingArgument, { value: newValue });
+        if (newValue) Object.assign(matchingArgument, { value: newValue });
       }
       return { node, variableDefinitions };
     }
@@ -132,13 +147,18 @@ class FieldArgTypeRewriter extends Rewriter {
     const args = [...(node.arguments ? node.arguments : [])];
     return {
       ...variables,
-      [varRefName]: this.coerceVariable(variables[varRefName], { variables, args })
+      ...(varRefName
+        ? { [varRefName]: this.coerceVariable(variables[varRefName], { variables, args }) }
+        : {})
     };
   }
 
   private extractMatchingVarRefName(node: FieldNode) {
-    const matchingArgument = (node.arguments || []).find(arg => arg.name.value === this.argName);
-    return ((matchingArgument as ArgumentNode).value as VariableNode).name.value;
+    const matchingArgument = <ArgumentNode>(
+      (node.arguments || []).find(arg => arg.name.value === this.argName)
+    );
+    const variableNode = <VariableNode>matchingArgument.value;
+    return variableNode.kind === Kind.VARIABLE && variableNode.name.value;
   }
 }
 
