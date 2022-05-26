@@ -40,8 +40,9 @@ abstract class Rewriter {
     if (
       node.kind !== 'Field' ||
       (this.fieldName ? node.name.value !== this.fieldName : !this.matchConditions)
-    )
+    ) {
       return false;
+    }
     const root = parents[0];
     if (
       root.kind === 'OperationDefinition' &&
@@ -61,11 +62,11 @@ abstract class Rewriter {
     return true;
   }
 
-  public rewriteQuery(nodeAndVarDefs: NodeAndVarDefs, _?: Variables): NodeAndVarDefs {
+  public rewriteQuery(nodeAndVarDefs: NodeAndVarDefs, variables: Variables): NodeAndVarDefs {
     return nodeAndVarDefs;
   }
 
-  public rewriteVariables(_: NodeAndVarDefs, variables: Variables): Variables {
+  public rewriteVariables(nodeAndVarDefs: NodeAndVarDefs, variables: Variables): Variables {
     return variables;
   }
 

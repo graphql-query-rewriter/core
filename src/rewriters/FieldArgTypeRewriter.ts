@@ -1,13 +1,13 @@
 import {
   ArgumentNode,
-  ValueNode,
   ASTNode,
   FieldNode,
+  isValueNode,
+  Kind,
   parseType,
   TypeNode,
-  VariableNode,
-  Kind,
-  isValueNode
+  ValueNode,
+  VariableNode
 } from 'graphql';
 import Maybe from 'graphql/tsutils/Maybe';
 import { NodeAndVarDefs, nodesMatch } from '../ast';
@@ -118,26 +118,23 @@ class FieldArgTypeRewriter extends Rewriter {
       return { node, variableDefinitions: newVarDefs };
     }
     // If argument value is not stored in a variable but in the query node.
-    else {
-      const matchingArgument = (node.arguments || []).find(arg => arg.name.value === this.argName);
-      if (node.arguments && matchingArgument) {
-        const args = [...node.arguments];
-        const newValue = this.coerceArgumentValue(matchingArgument.value, { variables, args });
-        /**
-          TODO: If somewhow we can get the schema here, we could make the coerceArgumentValue
-          even easier, as we would be able to construct the ast node for the argument value.
-          as of now, the user has to take care of correctly constructing the argument value ast node herself.
-
-          const schema = makeExecutableSchema({typeDefs})
-          const myCustomType = schema.getType("MY_CUSTOM_TYPE_NAME")
-          const newArgValue = astFromValue(newValue, myCustomType)
-          Object.assign(matchingArgument, { value: newArgValue })
-
-         */
-        if (newValue) Object.assign(matchingArgument, { value: newValue });
-      }
-      return { node, variableDefinitions };
+    const matchingArgument = (node.arguments || []).find(arg => arg.name.value === this.argName);
+    if (node.arguments && matchingArgument) {
+      const args = [...node.arguments];
+      const newValue = this.coerceArgumentValue(matchingArgument.value, { variables, args });
+      /**
+       * TODO: If somewhow we can get the schema here, we could make the coerceArgumentValue
+       * even easier, as we would be able to construct the ast node for the argument value.
+       * as of now, the user has to take care of correctly constructing the argument value ast node herself.
+       *
+       * const schema = makeExecutableSchema({typeDefs})
+       * const myCustomType = schema.getType("MY_CUSTOM_TYPE_NAME")
+       * const newArgValue = astFromValue(newValue, myCustomType)
+       * Object.assign(matchingArgument, { value: newArgValue })
+       */
+      if (newValue) Object.assign(matchingArgument, { value: newValue });
     }
+    return { node, variableDefinitions };
   }
 
   public rewriteVariables({ node: astNode }: NodeAndVarDefs, variables: Variables) {
@@ -154,10 +151,10 @@ class FieldArgTypeRewriter extends Rewriter {
   }
 
   private extractMatchingVarRefName(node: FieldNode) {
-    const matchingArgument = <ArgumentNode>(
-      (node.arguments || []).find(arg => arg.name.value === this.argName)
-    );
-    const variableNode = <VariableNode>matchingArgument.value;
+    const matchingArgument = (node.arguments || []).find(
+      arg => arg.name.value === this.argName
+    ) as ArgumentNode;
+    const variableNode = matchingArgument.value as VariableNode;
     return variableNode.kind === Kind.VARIABLE && variableNode.name.value;
   }
 }
