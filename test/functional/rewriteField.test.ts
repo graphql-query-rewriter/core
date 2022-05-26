@@ -120,6 +120,67 @@ describe('Rewrite scalar field to be a nested object with a single scalar field'
     });
   });
 
+  it('rewrites a scalar field to be a renamed object field with variable arguments and with 1 scalar subfield', () => {
+    const handler = new RewriteHandler([
+      new FieldRewriter({
+        fieldName: 'subField',
+        newFieldName: 'renamedSubField',
+        arguments: ['arg1'],
+        objectFieldName: 'value'
+      })
+    ]);
+
+    const query = gqlFmt`
+      query getTheThing($arg1: String) {
+        theThing {
+          thingField {
+            id
+            subField
+            color
+          }
+        }
+      }
+    `;
+    const expectedRewritenQuery = gqlFmt`
+      query getTheThing($arg1: String) {
+        theThing {
+          thingField {
+            id
+            renamedSubField(arg1: $arg1) {
+              value
+            }
+            color
+          }
+        }
+      }
+    `;
+    expect(handler.rewriteRequest(query, { arg1: 'thingArg' })).toEqual({
+      query: expectedRewritenQuery,
+      variables: { arg1: 'thingArg' }
+    });
+    expect(
+      handler.rewriteResponse({
+        theThing: {
+          thingField: {
+            id: 1,
+            renamedSubField: {
+              value: 'THING'
+            },
+            color: 'blue'
+          }
+        }
+      })
+    ).toEqual({
+      theThing: {
+        thingField: {
+          id: 1,
+          subField: 'THING',
+          color: 'blue'
+        }
+      }
+    });
+  });
+
   it('renames a field', () => {
     const handler = new RewriteHandler([
       new FieldRewriter({

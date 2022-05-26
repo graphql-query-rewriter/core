@@ -1,4 +1,11 @@
-import { ASTNode, DocumentNode, FragmentDefinitionNode, VariableDefinitionNode } from 'graphql';
+import {
+  ArgumentNode,
+  ASTNode,
+  DocumentNode,
+  FragmentDefinitionNode,
+  Kind,
+  VariableDefinitionNode
+} from 'graphql';
 import { pushToArrayAtKey } from './utils';
 
 const ignoreKeys = new Set(['loc']);
@@ -250,6 +257,27 @@ export const extractPath = (parents: ReadonlyArray<ASTNode>): ReadonlyArray<stri
     }
   });
   return path;
+};
+
+/**
+ * return an ArgumentNode with a VariableNode as its value node with matching name.
+ */
+/** @hidden */
+export const astArgVarNode = (argName: string): ArgumentNode => {
+  return {
+    kind: Kind.ARGUMENT,
+    name: {
+      kind: Kind.NAME,
+      value: argName
+    },
+    value: {
+      kind: Kind.VARIABLE,
+      name: {
+        kind: Kind.NAME,
+        value: argName
+      }
+    }
+  };
 };
 
 /** @hidden */
