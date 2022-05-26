@@ -88,9 +88,15 @@ class FieldRewriter extends Rewriter {
     if (element === null) return response;
 
     let originalKey = key;
+    // if the key is found to be the renamed field
+    // then change the name of such field in the response
+    // and pass the new key (field name) down.
     if (key === this.newFieldName) {
-      delete response[key];
-      if (this.fieldName) originalKey = this.fieldName;
+      if (this.fieldName) {
+        originalKey = this.fieldName;
+        Object.assign(response, { [originalKey]: response[key] });
+        delete response[key];
+      }
     }
     // Undo the nesting in the response so it matches the original query
     let newElement = element;
