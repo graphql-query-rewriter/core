@@ -1,4 +1,4 @@
-import { FragmentDefinitionNode, parse, print } from 'graphql';
+import { ASTNode, FragmentDefinitionNode, parse, print } from 'graphql';
 import { extractPath, FragmentTracer, rewriteDoc, rewriteResultsAtPath } from './ast';
 import Rewriter, { Variables } from './rewriters/Rewriter';
 
@@ -7,6 +7,7 @@ interface RewriterMatch {
   fieldPaths: ReadonlyArray<ReadonlyArray<string>>;
   // TODO: allPaths hasnt been tested for fragments
   allPaths: ReadonlyArray<ReadonlyArray<string>>;
+  nodeMatchAndParents?: ASTNode[];
 }
 
 /**
@@ -56,7 +57,10 @@ export default class RewriteHandler {
           this.matches.push({
             rewriter,
             fieldPaths,
-            allPaths
+            allPaths,
+            ...(rewriter.saveNode
+              ? { nodeMatchAndParents: [...parents, rewrittenNodeAndVars.node] }
+              : {})
           });
         }
         return isMatch;
@@ -76,13 +80,14 @@ export default class RewriteHandler {
     if (this.hasProcessedResponse) throw new Error('This handler has already returned a response');
     this.hasProcessedResponse = true;
     let rewrittenResponse = response;
-    this.matches.reverse().forEach(({ rewriter, fieldPaths, allPaths }) => {
+    this.matches.reverse().forEach(({ rewriter, fieldPaths, allPaths, nodeMatchAndParents }) => {
       const paths = rewriter.matchAnyPath ? allPaths : fieldPaths;
       paths.forEach(path => {
         rewrittenResponse = rewriteResultsAtPath(
           rewrittenResponse,
           path,
-          (parentResponse, key, index) => rewriter.rewriteResponse(parentResponse, key, index)
+          (parentResponse, key, index) =>
+            rewriter.rewriteResponse(parentResponse, key, index, nodeMatchAndParents)
         );
       });
     });

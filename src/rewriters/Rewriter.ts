@@ -10,6 +10,7 @@ export interface RewriterOpts {
   rootTypes?: RootType[];
   matchConditions?: matchCondition[];
   matchAnyPath?: boolean;
+  saveNode?: boolean;
 }
 
 /**
@@ -18,14 +19,22 @@ export interface RewriterOpts {
  */
 abstract class Rewriter {
   public matchAnyPath: boolean = false;
+  public saveNode: boolean = false;
   protected rootTypes: RootType[] = ['query', 'mutation', 'fragment'];
   protected fieldName?: string;
   protected matchConditions?: matchCondition[];
 
-  constructor({ fieldName, rootTypes, matchConditions, matchAnyPath = false }: RewriterOpts) {
+  constructor({
+    fieldName,
+    rootTypes,
+    matchConditions,
+    matchAnyPath = false,
+    saveNode = false
+  }: RewriterOpts) {
     this.fieldName = fieldName;
     this.matchConditions = matchConditions;
     this.matchAnyPath = matchAnyPath;
+    this.saveNode = saveNode;
     if (!this.fieldName && !this.matchConditions) {
       throw new Error(
         'Neither a fieldName or matchConditions were provided. Please choose to pass either one in order to be able to detect which fields to rewrite.'
@@ -77,7 +86,12 @@ abstract class Rewriter {
    * Receives the parent object of the matched field with the key of the matched field.
    * For arrays, the index of the element is also present.
    */
-  public rewriteResponse(response: any, key: string, index?: number): any {
+  public rewriteResponse(
+    response: any,
+    key: string,
+    index?: number,
+    nodeMatchAndParents?: ASTNode[]
+  ): any {
     return response;
   }
 

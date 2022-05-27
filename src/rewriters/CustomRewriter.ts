@@ -5,7 +5,12 @@ import Rewriter, { RewriterOpts, Variables } from './Rewriter';
 interface CustomRewriterOpts extends RewriterOpts {
   matchesFn?: (nodeAndVarDefs: NodeAndVarDefs, parents: ReadonlyArray<ASTNode>) => boolean;
   rewriteQueryFn?: (nodeAndVarDefs: NodeAndVarDefs, variables: Variables) => NodeAndVarDefs;
-  rewriteResponseFn?: (response: any, key: string, index?: number) => NodeAndVarDefs;
+  rewriteResponseFn?: (
+    response: any,
+    key: string,
+    index?: number,
+    nodeMatchAndParents?: ASTNode[]
+  ) => NodeAndVarDefs;
 }
 
 /**
@@ -18,7 +23,12 @@ class CustomRewriter extends Rewriter {
     nodeAndVarDefs: NodeAndVarDefs,
     variables: Variables
   ) => NodeAndVarDefs;
-  protected rewriteResponseFn: (response: any, key: string, index?: number) => NodeAndVarDefs;
+  protected rewriteResponseFn: (
+    response: any,
+    key: string,
+    index?: number,
+    nodeMatchAndParents?: ASTNode[]
+  ) => NodeAndVarDefs;
 
   constructor(options: CustomRewriterOpts) {
     const { matchesFn, rewriteQueryFn, rewriteResponseFn, ...rewriterOpts } = options;
@@ -36,8 +46,13 @@ class CustomRewriter extends Rewriter {
     return this.rewriteQueryFn(nodeAndVarDefs, variables);
   }
 
-  public rewriteResponse(response: any, key: string, index?: number) {
-    return this.rewriteResponseFn(response, key, index);
+  public rewriteResponse(
+    response: any,
+    key: string,
+    index?: number,
+    nodeMatchAndParents?: ASTNode[]
+  ) {
+    return this.rewriteResponseFn(response, key, index, nodeMatchAndParents);
   }
 }
 

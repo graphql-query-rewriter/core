@@ -1,4 +1,4 @@
-import { ASTNode, Kind } from 'graphql';
+import { ASTNode, Kind, NameNode, OperationDefinitionNode } from 'graphql';
 import { NodeAndVarDefs } from '../../src/ast';
 import RewriteHandler from '../../src/RewriteHandler';
 import CustomRewriter from '../../src/rewriters/CustomRewriter';
@@ -27,14 +27,25 @@ const rewriteQueryFn = (nodeAndVarDefs: any) => {
   return { ...nodeAndVarDefs, node: newNode };
 };
 
-const rewriteResponseFn = (response: any, key: string, index?: number) => {
+const rewriteResponseFn = (
+  response: any,
+  key: string,
+  index?: number,
+  nodeMatchAndParents?: ASTNode[]
+) => {
   // If the key is the query name, then get into the response
   // and retrieve the targetField, then delete it and place it in the
   // desired position.
-  if (key === 'getTheThing') {
-    const targetField = response.targetField;
-    delete response.targetField;
-    Object.assign(response.theThing, { targetField });
+  if (nodeMatchAndParents) {
+    const parentNode = nodeMatchAndParents.slice(-2)[0] as OperationDefinitionNode;
+    if (parentNode && parentNode.name) {
+      const queryName = parentNode.name.value;
+      if (key === queryName) {
+        const targetField = response.targetField;
+        delete response.targetField;
+        Object.assign(response.theThing, { targetField });
+      }
+    }
   }
   return response;
 };
@@ -46,7 +57,8 @@ describe('Custom Rewriter, tests for specific rewriters.', () => {
         matchesFn,
         rewriteQueryFn,
         rewriteResponseFn,
-        matchAnyPath: true
+        matchAnyPath: true,
+        saveNode: true
       })
     ]);
 
