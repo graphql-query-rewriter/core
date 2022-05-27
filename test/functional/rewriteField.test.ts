@@ -2,7 +2,7 @@ import RewriteHandler from '../../src/RewriteHandler';
 import FieldRewriter from '../../src/rewriters/FieldRewriter';
 import { gqlFmt } from '../testUtils';
 
-describe('Rewrite scalar field to be a nested object with a single scalar field', () => {
+describe('Generic Field rewriter', () => {
   it('rewrites a scalar field to be an object field with 1 scalar subfield', () => {
     const handler = new RewriteHandler([
       new FieldRewriter({
@@ -116,6 +116,49 @@ describe('Rewrite scalar field to be a nested object with a single scalar field'
           subField: 'THING',
           color: 'blue'
         }
+      }
+    });
+  });
+
+  it('works with aliased fields', () => {
+    const handler = new RewriteHandler([
+      new FieldRewriter({
+        fieldName: 'subField',
+        newFieldName: 'renamedSubField',
+        objectFieldName: 'value'
+      })
+    ]);
+
+    const query = gqlFmt`
+      query getTheThing {
+        agg: anotheThing {
+          subField
+        }
+      }
+    `;
+    const expectedRewritenQuery = gqlFmt`
+      query getTheThing {
+        agg: anotheThing {
+          renamedSubField {
+            value
+          }
+        }
+      }
+    `;
+    expect(handler.rewriteRequest(query)).toEqual({
+      query: expectedRewritenQuery
+    });
+    expect(
+      handler.rewriteResponse({
+        agg: {
+          renamedSubField: {
+            value: 'THING'
+          }
+        }
+      })
+    ).toEqual({
+      agg: {
+        subField: 'THING'
       }
     });
   });

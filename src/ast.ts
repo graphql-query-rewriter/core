@@ -246,14 +246,31 @@ export const replaceVariableDefinitions = (
 };
 
 /**
- * return the path that will be returned in the response from from the chain of parents
+ * Return the path that will be returned in the response from the chain of parents.
+ * By default this will only build up paths for field nodes, but the anyKind flag allows
+ * to build paths for any named node.
+ *
+ * It also supports aliases.
  */
 /** @hidden */
-export const extractPath = (parents: ReadonlyArray<ASTNode>): ReadonlyArray<string> => {
+export const extractPath = (
+  parents: ReadonlyArray<ASTNode>,
+  anyKind?: boolean
+): ReadonlyArray<string> => {
   const path: string[] = [];
-  parents.forEach(parent => {
-    if (parent.kind === 'Field') {
-      path.push(parent.name.value);
+  parents.forEach((parent: any) => {
+    if (anyKind) {
+      if (parent.alias) {
+        path.push(parent.alias.value);
+      } else if (parent.name) {
+        path.push(parent.name.value);
+      }
+    } else if (parent.kind === 'Field') {
+      if (parent.alias) {
+        path.push(parent.alias.value);
+      } else {
+        path.push(parent.name.value);
+      }
     }
   });
   return path;

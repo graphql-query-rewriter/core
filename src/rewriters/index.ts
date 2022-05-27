@@ -6,3 +6,4 @@ export { default as NestFieldOutputsRewriter } from './NestFieldOutputsRewriter'
 export { default as ScalarFieldToObjectFieldRewriter } from './ScalarFieldToObjectFieldRewriter';
 export { default as JsonToTypedObjectRewriter } from './JsonToTypedObjectRewriter';
 export { default as FieldRewriter } from './FieldRewriter';
+export { default as CustomRewriter } from './CustomRewriter';

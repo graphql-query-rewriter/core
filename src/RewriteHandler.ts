@@ -4,7 +4,9 @@ import Rewriter, { Variables } from './rewriters/Rewriter';
 
 interface RewriterMatch {
   rewriter: Rewriter;
-  paths: ReadonlyArray<ReadonlyArray<string>>;
+  fieldPaths: ReadonlyArray<ReadonlyArray<string>>;
+  // TODO: allPaths hasnt been tested for fragments
+  allPaths: ReadonlyArray<ReadonlyArray<string>>;
 }
 
 /**
@@ -17,9 +19,11 @@ export default class RewriteHandler {
   private rewriters: Rewriter[];
   private hasProcessedRequest: boolean = false;
   private hasProcessedResponse: boolean = false;
+  private matchAnyPath: boolean = false;
 
-  constructor(rewriters: Rewriter[]) {
+  constructor(rewriters: Rewriter[], matchAnyPath: boolean = false) {
     this.rewriters = rewriters;
+    this.matchAnyPath = matchAnyPath;
   }
 
   /**
@@ -40,17 +44,21 @@ export default class RewriteHandler {
         if (isMatch) {
           rewrittenVariables = rewriter.rewriteVariables(rewrittenNodeAndVars, rewrittenVariables);
           rewrittenNodeAndVars = rewriter.rewriteQuery(rewrittenNodeAndVars, rewrittenVariables);
-          const simplePath = extractPath([...parents, rewrittenNodeAndVars.node]);
-          let paths: ReadonlyArray<ReadonlyArray<string>> = [simplePath];
+          const fieldPath = extractPath([...parents, rewrittenNodeAndVars.node]);
+          const anyPath = extractPath([...parents, rewrittenNodeAndVars.node], true);
+          let fieldPaths: ReadonlyArray<ReadonlyArray<string>> = [fieldPath];
+          let allPaths: ReadonlyArray<ReadonlyArray<string>> = [anyPath];
           const fragmentDef = parents.find(({ kind }) => kind === 'FragmentDefinition') as
             | FragmentDefinitionNode
             | undefined;
           if (fragmentDef) {
-            paths = fragmentTracer.prependFragmentPaths(fragmentDef.name.value, simplePath);
+            fieldPaths = fragmentTracer.prependFragmentPaths(fragmentDef.name.value, fieldPath);
+            allPaths = fragmentTracer.prependFragmentPaths(fragmentDef.name.value, anyPath);
           }
           this.matches.push({
             rewriter,
-            paths
+            fieldPaths,
+            allPaths
           });
         }
         return isMatch;
@@ -70,7 +78,8 @@ export default class RewriteHandler {
     if (this.hasProcessedResponse) throw new Error('This handler has already returned a response');
     this.hasProcessedResponse = true;
     let rewrittenResponse = response;
-    this.matches.reverse().forEach(({ rewriter, paths }) => {
+    this.matches.reverse().forEach(({ rewriter, fieldPaths, allPaths }) => {
+      const paths = this.matchAnyPath ? allPaths : fieldPaths;
       paths.forEach(path => {
         rewrittenResponse = rewriteResultsAtPath(
           rewrittenResponse,
