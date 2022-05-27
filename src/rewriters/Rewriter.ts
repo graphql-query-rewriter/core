@@ -9,6 +9,7 @@ export interface RewriterOpts {
   fieldName?: string;
   rootTypes?: RootType[];
   matchConditions?: matchCondition[];
+  matchAnyPath?: boolean;
 }
 
 /**
@@ -16,13 +17,15 @@ export interface RewriterOpts {
  * Extend this class and overwrite its methods to create a new rewriter
  */
 abstract class Rewriter {
+  public matchAnyPath: boolean = false;
   protected rootTypes: RootType[] = ['query', 'mutation', 'fragment'];
   protected fieldName?: string;
   protected matchConditions?: matchCondition[];
 
-  constructor({ fieldName, rootTypes, matchConditions }: RewriterOpts) {
+  constructor({ fieldName, rootTypes, matchConditions, matchAnyPath = false }: RewriterOpts) {
     this.fieldName = fieldName;
     this.matchConditions = matchConditions;
+    this.matchAnyPath = matchAnyPath;
     if (!this.fieldName && !this.matchConditions) {
       throw new Error(
         'Neither a fieldName or matchConditions were provided. Please choose to pass either one in order to be able to detect which fields to rewrite.'

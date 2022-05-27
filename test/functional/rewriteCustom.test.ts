@@ -41,16 +41,14 @@ const rewriteResponseFn = (response: any, key: string, index?: number) => {
 
 describe('Custom Rewriter, tests for specific rewriters.', () => {
   it('Hoists a target Field Node', () => {
-    const handler = new RewriteHandler(
-      [
-        new CustomRewriter({
-          matchesFn,
-          rewriteQueryFn,
-          rewriteResponseFn
-        })
-      ],
-      true
-    );
+    const handler = new RewriteHandler([
+      new CustomRewriter({
+        matchesFn,
+        rewriteQueryFn,
+        rewriteResponseFn,
+        matchAnyPath: true
+      })
+    ]);
 
     const query = gqlFmt`
       query getTheThing {

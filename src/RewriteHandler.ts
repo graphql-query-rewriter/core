@@ -19,11 +19,9 @@ export default class RewriteHandler {
   private rewriters: Rewriter[];
   private hasProcessedRequest: boolean = false;
   private hasProcessedResponse: boolean = false;
-  private matchAnyPath: boolean = false;
 
-  constructor(rewriters: Rewriter[], matchAnyPath: boolean = false) {
+  constructor(rewriters: Rewriter[]) {
     this.rewriters = rewriters;
-    this.matchAnyPath = matchAnyPath;
   }
 
   /**
@@ -79,7 +77,7 @@ export default class RewriteHandler {
     this.hasProcessedResponse = true;
     let rewrittenResponse = response;
     this.matches.reverse().forEach(({ rewriter, fieldPaths, allPaths }) => {
-      const paths = this.matchAnyPath ? allPaths : fieldPaths;
+      const paths = rewriter.matchAnyPath ? allPaths : fieldPaths;
       paths.forEach(path => {
         rewrittenResponse = rewriteResultsAtPath(
           rewrittenResponse,
