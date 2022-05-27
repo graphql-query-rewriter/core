@@ -163,6 +163,49 @@ describe('Generic Field rewriter', () => {
     });
   });
 
+  it('works using alias for new field names', () => {
+    const handler = new RewriteHandler([
+      new FieldRewriter({
+        fieldName: 'subField',
+        newFieldName: 'aliasedField: renamedSubField',
+        objectFieldName: 'value'
+      })
+    ]);
+
+    const query = gqlFmt`
+      query getTheThing {
+        agg: anotheThing {
+          subField
+        }
+      }
+    `;
+    const expectedRewritenQuery = gqlFmt`
+      query getTheThing {
+        agg: anotheThing {
+          aliasedField: renamedSubField {
+            value
+          }
+        }
+      }
+    `;
+    expect(handler.rewriteRequest(query)).toEqual({
+      query: expectedRewritenQuery
+    });
+    expect(
+      handler.rewriteResponse({
+        agg: {
+          aliasedField: {
+            value: 'THING'
+          }
+        }
+      })
+    ).toEqual({
+      agg: {
+        subField: 'THING'
+      }
+    });
+  });
+
   it('renames object field with an object as response value', () => {
     const handler = new RewriteHandler([
       new FieldRewriter({

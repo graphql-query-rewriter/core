@@ -1,4 +1,4 @@
-import { ArgumentNode, ASTNode, FieldNode, SelectionSetNode } from 'graphql';
+import { ArgumentNode, ASTNode, FieldNode, Kind, SelectionSetNode } from 'graphql';
 import { astArgVarNode, NodeAndVarDefs } from '../ast';
 import Rewriter, { RewriterOpts, Variables } from './Rewriter';
 
@@ -41,7 +41,13 @@ class FieldRewriter extends Rewriter {
 
     // if fieldName is meant to be renamed.
     if (this.newFieldName) {
-      Object.assign(node.name, { value: this.newFieldName });
+      let newName = this.newFieldName;
+      if (this.newFieldName.includes(':')) {
+        const [alias, name] = this.newFieldName.split(':');
+        newName = name.trim();
+        Object.assign(node, { alias: { value: alias.trim(), kind: Kind.NAME } });
+      }
+      Object.assign(node.name, { value: newName });
     }
 
     // if there's the intention of converting the field to a subselection
@@ -91,11 +97,19 @@ class FieldRewriter extends Rewriter {
     // if the key is found to be the renamed field
     // then change the name of such field in the response
     // and pass the new key (field name) down.
-    if (key === this.newFieldName) {
-      if (this.fieldName) {
-        originalKey = this.fieldName;
-        Object.assign(response, { [originalKey]: response[key] });
-        delete response[key];
+    if (this.newFieldName) {
+      let newFieldName = this.newFieldName;
+      // the newFieldName may be alised.
+      if (this.newFieldName.includes(':')) {
+        const [alias] = this.newFieldName.split(':');
+        newFieldName = alias.trim();
+      }
+      if (key === newFieldName) {
+        if (this.fieldName) {
+          originalKey = this.fieldName;
+          Object.assign(response, { [originalKey]: response[key] });
+          delete response[key];
+        }
       }
     }
     // Undo the nesting in the response so it matches the original query
