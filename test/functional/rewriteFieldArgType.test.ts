@@ -179,18 +179,13 @@ describe('Rewrite field arg type', () => {
   });
 
   it('should fail if neither a fieldName or matchConditions are provided', () => {
-    try {
+    expect(() => {
       new FieldArgTypeRewriter({
         argName: 'identifier',
         oldType: 'String!',
         newType: 'Int!'
       });
-    } catch (error) {
-      console.log(error.message);
-      expect(
-        error.message.includes('Neither a fieldName or matchConditions were provided')
-      ).toEqual(true);
-    }
+    }).toThrow('Neither a fieldName or matchConditions were provided');
   });
 
   it('allows matching using matchConditions when fieldName is not provided.', () => {
