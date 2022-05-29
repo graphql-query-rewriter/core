@@ -39,7 +39,7 @@ export default class RewriteHandler {
         const isMatch = rewriter.matches(nodeAndVars, parents);
         if (isMatch) {
           rewrittenVariables = rewriter.rewriteVariables(rewrittenNodeAndVars, rewrittenVariables);
-          rewrittenNodeAndVars = rewriter.rewriteQuery(rewrittenNodeAndVars);
+          rewrittenNodeAndVars = rewriter.rewriteQuery(rewrittenNodeAndVars, rewrittenVariables);
           const simplePath = extractPath([...parents, rewrittenNodeAndVars.node]);
           let paths: ReadonlyArray<ReadonlyArray<string>> = [simplePath];
           const fragmentDef = parents.find(({ kind }) => kind === 'FragmentDefinition') as
