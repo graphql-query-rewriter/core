@@ -31,8 +31,14 @@ class CustomRewriter extends Rewriter {
   ) => NodeAndVarDefs;
 
   constructor(options: CustomRewriterOpts) {
-    const { matchesFn, rewriteQueryFn, rewriteResponseFn, ...rewriterOpts } = options;
-    super({ ...rewriterOpts, matchConditions: [() => true] });
+    const {
+      matchesFn,
+      rewriteQueryFn,
+      rewriteResponseFn,
+      matchConditions = [() => true],
+      ...rewriterOpts
+    } = options;
+    super({ ...rewriterOpts, matchConditions });
     this.matchesFn = matchesFn || super.matches;
     this.rewriteQueryFn = rewriteQueryFn || super.rewriteQuery;
     this.rewriteResponseFn = rewriteResponseFn || super.rewriteResponse;
