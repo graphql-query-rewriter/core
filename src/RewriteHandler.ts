@@ -4,7 +4,7 @@ import Rewriter, { Variables } from './rewriters/Rewriter';
 
 interface RewriterMatch {
   rewriter: Rewriter;
-  fieldPaths: ReadonlyArray<ReadonlyArray<string>>;
+  paths: ReadonlyArray<ReadonlyArray<string>>;
   // TODO: allPaths hasnt been tested for fragments
   allPaths: ReadonlyArray<ReadonlyArray<string>>;
   nodeMatchAndParents?: ASTNode[];
@@ -56,8 +56,8 @@ export default class RewriteHandler {
           }
           this.matches.push({
             rewriter,
-            fieldPaths,
             allPaths,
+            paths: fieldPaths,
             ...(rewriter.saveNode
               ? { nodeMatchAndParents: [...parents, rewrittenNodeAndVars.node] }
               : {})
@@ -80,17 +80,19 @@ export default class RewriteHandler {
     if (this.hasProcessedResponse) throw new Error('This handler has already returned a response');
     this.hasProcessedResponse = true;
     let rewrittenResponse = response;
-    this.matches.reverse().forEach(({ rewriter, fieldPaths, allPaths, nodeMatchAndParents }) => {
-      const paths = rewriter.matchAnyPath ? allPaths : fieldPaths;
-      paths.forEach(path => {
-        rewrittenResponse = rewriteResultsAtPath(
-          rewrittenResponse,
-          path,
-          (parentResponse, key, index) =>
-            rewriter.rewriteResponse(parentResponse, key, index, nodeMatchAndParents)
-        );
+    this.matches
+      .reverse()
+      .forEach(({ rewriter, paths: fieldPaths, allPaths, nodeMatchAndParents }) => {
+        const paths = rewriter.matchAnyPath ? allPaths : fieldPaths;
+        paths.forEach(path => {
+          rewrittenResponse = rewriteResultsAtPath(
+            rewrittenResponse,
+            path,
+            (parentResponse, key, index) =>
+              rewriter.rewriteResponse(parentResponse, key, index, nodeMatchAndParents)
+          );
+        });
       });
-    });
     return rewrittenResponse;
   }
 }

@@ -259,16 +259,10 @@ export const extractPath = (
 ): ReadonlyArray<string> => {
   const path: string[] = [];
   parents.forEach((parent: any) => {
-    if (anyKind) {
+    if (parent.kind === 'Field' || anyKind) {
       if (parent.alias) {
         path.push(parent.alias.value);
       } else if (parent.name) {
-        path.push(parent.name.value);
-      }
-    } else if (parent.kind === 'Field') {
-      if (parent.alias) {
-        path.push(parent.alias.value);
-      } else {
         path.push(parent.name.value);
       }
     }
