@@ -9,8 +9,7 @@ export interface RewriterOpts {
   fieldName?: string;
   rootTypes?: RootType[];
   matchConditions?: matchCondition[];
-  matchAnyPath?: boolean;
-  saveNode?: boolean;
+  includeNonFieldPathsInMatch?: boolean;
 }
 
 /**
@@ -18,8 +17,7 @@ export interface RewriterOpts {
  * Extend this class and overwrite its methods to create a new rewriter
  */
 abstract class Rewriter {
-  public matchAnyPath: boolean = false;
-  public saveNode: boolean = false;
+  public includeNonFieldPathsInMatch: boolean = false;
   protected rootTypes: RootType[] = ['query', 'mutation', 'fragment'];
   protected fieldName?: string;
   protected matchConditions?: matchCondition[];
@@ -28,13 +26,11 @@ abstract class Rewriter {
     fieldName,
     rootTypes,
     matchConditions,
-    matchAnyPath = false,
-    saveNode = false
+    includeNonFieldPathsInMatch = false
   }: RewriterOpts) {
     this.fieldName = fieldName;
     this.matchConditions = matchConditions;
-    this.matchAnyPath = matchAnyPath;
-    this.saveNode = saveNode;
+    this.includeNonFieldPathsInMatch = includeNonFieldPathsInMatch;
     if (!this.fieldName && !this.matchConditions) {
       throw new Error(
         'Neither a fieldName or matchConditions were provided. Please choose to pass either one in order to be able to detect which fields to rewrite.'

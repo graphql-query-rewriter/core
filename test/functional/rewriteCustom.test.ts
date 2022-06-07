@@ -57,8 +57,7 @@ describe('Custom Rewriter, tests for specific rewriters.', () => {
         matchesFn,
         rewriteQueryFn,
         rewriteResponseFn,
-        matchAnyPath: true,
-        saveNode: true
+        includeNonFieldPathsInMatch: true
       })
     ]);
 

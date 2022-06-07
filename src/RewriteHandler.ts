@@ -58,9 +58,7 @@ export default class RewriteHandler {
             rewriter,
             allPaths,
             paths: fieldPaths,
-            ...(rewriter.saveNode
-              ? { nodeMatchAndParents: [...parents, rewrittenNodeAndVars.node] }
-              : {})
+            nodeMatchAndParents: [...parents, rewrittenNodeAndVars.node]
           });
         }
         return isMatch;
@@ -83,7 +81,7 @@ export default class RewriteHandler {
     this.matches
       .reverse()
       .forEach(({ rewriter, paths: fieldPaths, allPaths, nodeMatchAndParents }) => {
-        const paths = rewriter.matchAnyPath ? allPaths : fieldPaths;
+        const paths = rewriter.includeNonFieldPathsInMatch ? allPaths : fieldPaths;
         paths.forEach(path => {
           rewrittenResponse = rewriteResultsAtPath(
             rewrittenResponse,
