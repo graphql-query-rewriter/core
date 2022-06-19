@@ -112,6 +112,9 @@ class FieldRewriter extends Rewriter {
         }
       }
     }
+    // If the element is an empty array, return the response, since
+    // there's nothing left to rewrite down that path.
+    if (Array.isArray(element) && element.length === 0) return response;
     // Undo the nesting in the response so it matches the original query
     let newElement = element;
     if (this.objectFieldName) {

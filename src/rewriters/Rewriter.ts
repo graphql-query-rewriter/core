@@ -104,7 +104,11 @@ abstract class Rewriter {
 
     // Extract the position
     if (Array.isArray(element)) {
-      element = element[index!] || null;
+      // if element is an empty array do not try to get
+      // one of its array elements
+      if (element.length !== 0) {
+        element = element[index!] || null;
+      }
     }
 
     return element;

@@ -308,6 +308,12 @@ export const rewriteResultsAtPath = (
   const newResults = { ...results };
   const curResults = results[curPathElm];
 
+  // if results[curPathElm] is an empty array, call the callback response rewriter
+  // because there's nothing left to do.
+  if (Array.isArray(curResults) && curResults.length === 0) {
+    callback(results, curPathElm);
+  }
+
   if (path.length === 1) {
     if (Array.isArray(curResults)) {
       return curResults.reduce(

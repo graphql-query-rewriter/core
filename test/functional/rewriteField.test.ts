@@ -456,6 +456,65 @@ describe('Generic Field rewriter', () => {
     });
   });
 
+  it('renames an empty array field ', () => {
+    1;
+    const handler = new RewriteHandler([
+      new FieldRewriter({
+        fieldName: 'subField',
+        newFieldName: 'renamedSubField'
+      })
+    ]);
+
+    const query = gqlFmt`
+      query getTheThing {
+        theThing {
+          thingField {
+            id
+            subField {
+              value
+            }
+            color
+          }
+        }
+      }
+    `;
+    const expectedRewritenQuery = gqlFmt`
+      query getTheThing {
+        theThing {
+          thingField {
+            id
+            renamedSubField {
+              value
+            }
+            color
+          }
+        }
+      }
+    `;
+    expect(handler.rewriteRequest(query)).toEqual({
+      query: expectedRewritenQuery
+    });
+    expect(
+      handler.rewriteResponse({
+        theThing: {
+          thingField: {
+            id: 1,
+            renamedSubField: [],
+            color: 'blue'
+          }
+        }
+      })
+    ).toEqual({
+      theThing: {
+        thingField: {
+          id: 1,
+          subField: [],
+          color: 'blue'
+        }
+      }
+    });
+  });
+
   it('rewrites a scalar field to be a renamed object field with 1 scalar subfield', () => {
     const handler = new RewriteHandler([
       new FieldRewriter({
