@@ -5,7 +5,12 @@ import Rewriter, { Variables } from './rewriters/Rewriter';
 interface RewriterMatch {
   rewriter: Rewriter;
   paths: ReadonlyArray<ReadonlyArray<string>>;
-  // TODO: allPaths hasnt been tested for fragments
+  // TODO:
+  // - allPaths hasnt been tested for fragments
+  // - Give that allPaths includes non-field paths, there might be paths
+  // that don't match to a key in the results object traversed in
+  // 'rewriteResultsAtPath'. For now the 'includesNonFieldPaths' flag is passed to
+  // this function.
   allPaths: ReadonlyArray<ReadonlyArray<string>>;
   nodeMatchAndParents?: ASTNode[];
 }
@@ -87,7 +92,8 @@ export default class RewriteHandler {
             rewrittenResponse,
             path,
             (parentResponse, key, index) =>
-              rewriter.rewriteResponse(parentResponse, key, index, nodeMatchAndParents)
+              rewriter.rewriteResponse(parentResponse, key, index, nodeMatchAndParents),
+            rewriter.includeNonFieldPathsInMatch
           );
         });
       });

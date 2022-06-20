@@ -783,4 +783,65 @@ describe('Generic Field rewriter', () => {
       }
     });
   });
+
+  it('can traverse full response object when includeNonFieldPathsInMatch is set', () => {
+    const handler = new RewriteHandler([
+      new FieldRewriter({
+        fieldName: 'subField',
+        newFieldName: 'renamedSubField',
+        includeNonFieldPathsInMatch: true
+      })
+    ]);
+
+    const query = gqlFmt`
+      query getTheThing {
+        theThing {
+          thingField {
+            id
+            subField {
+              value
+            }
+            color
+          }
+        }
+      }
+    `;
+    const expectedRewritenQuery = gqlFmt`
+      query getTheThing {
+        theThing {
+          thingField {
+            id
+            renamedSubField {
+              value
+            }
+            color
+          }
+        }
+      }
+    `;
+    expect(handler.rewriteRequest(query)).toEqual({
+      query: expectedRewritenQuery
+    });
+    expect(
+      handler.rewriteResponse({
+        theThing: {
+          thingField: {
+            id: 1,
+            renamedSubField: {
+              value: 'THING'
+            },
+            color: 'blue'
+          }
+        }
+      })
+    ).toEqual({
+      theThing: {
+        thingField: {
+          id: 1,
+          subField: { value: 'THING' },
+          color: 'blue'
+        }
+      }
+    });
+  });
 });

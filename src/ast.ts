@@ -300,7 +300,8 @@ interface ResultObj {
 export const rewriteResultsAtPath = (
   results: ResultObj,
   path: ReadonlyArray<string>,
-  callback: (parentResult: any, key: string, position?: number) => any
+  callback: (parentResult: any, key: string, position?: number) => any,
+  includesNonFieldPaths?: boolean
 ): ResultObj => {
   if (path.length === 0) return results;
 
@@ -326,15 +327,30 @@ export const rewriteResultsAtPath = (
   }
 
   const remainingPath = path.slice(1);
-  // if the path stops here, just return results without any rewriting
-  if (curResults === undefined || curResults === null) return results;
+  if (curResults === undefined || curResults === null) {
+    // If curResults is undefined or null, and includesNonFieldPaths,
+    // its likely that curResults is undefined because curPathElm might not be a field path.
+    if (remainingPath.length && includesNonFieldPaths) {
+      // Call the callback in case the non-field paths is expected of a rewrite
+      callback(results, curPathElm);
+      // Then just continue with the next path
+      return rewriteResultsAtPath(results, remainingPath, callback, includesNonFieldPaths);
+    }
+    // else, if the path stops here, just return results without any rewriting
+    return results;
+  }
 
   if (Array.isArray(curResults)) {
     newResults[curPathElm] = curResults.map(result =>
-      rewriteResultsAtPath(result, remainingPath, callback)
+      rewriteResultsAtPath(result, remainingPath, callback, includesNonFieldPaths)
     );
   } else {
-    newResults[curPathElm] = rewriteResultsAtPath(curResults, remainingPath, callback);
+    newResults[curPathElm] = rewriteResultsAtPath(
+      curResults,
+      remainingPath,
+      callback,
+      includesNonFieldPaths
+    );
   }
 
   return newResults;
