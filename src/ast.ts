@@ -327,18 +327,18 @@ export const rewriteResultsAtPath = (
   }
 
   const remainingPath = path.slice(1);
-  if (curResults === undefined || curResults === null) {
-    // If curResults is undefined or null, and includesNonFieldPaths,
-    // its likely that curResults is undefined because curPathElm might not be a field path.
-    if (remainingPath.length && includesNonFieldPaths) {
-      // Call the callback in case the non-field paths is expected of a rewrite
-      callback(results, curPathElm);
-      // Then just continue with the next path
-      return rewriteResultsAtPath(results, remainingPath, callback, includesNonFieldPaths);
-    }
-    // else, if the path stops here, just return results without any rewriting
-    return results;
+
+  // If curResults is undefined, and includesNonFieldPaths is true,
+  // then curResults is not a field path, so call the callback to allow rewrites
+  // for non-field paths.
+  if (remainingPath.length && includesNonFieldPaths && curResults === undefined) {
+    callback(results, curPathElm);
+    // Then just continue with the next path
+    return rewriteResultsAtPath(results, remainingPath, callback, includesNonFieldPaths);
   }
+
+  // if the path stops here, just return results without any rewriting
+  if (curResults === undefined || curResults === null) return results;
 
   if (Array.isArray(curResults)) {
     newResults[curPathElm] = curResults.map(result =>
