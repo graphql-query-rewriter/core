@@ -1,6 +1,6 @@
 {
   "name": "graphql-query-rewriter-rc",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "description": "",
   "keywords": [],
   "main": "dist/index.umd.js",
