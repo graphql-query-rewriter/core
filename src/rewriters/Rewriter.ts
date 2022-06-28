@@ -9,6 +9,7 @@ export interface RewriterOpts {
   fieldName?: string;
   rootTypes?: RootType[];
   matchConditions?: matchCondition[];
+  includeNonFieldPathsInMatch?: boolean;
 }
 
 /**
@@ -16,13 +17,20 @@ export interface RewriterOpts {
  * Extend this class and overwrite its methods to create a new rewriter
  */
 abstract class Rewriter {
+  public includeNonFieldPathsInMatch: boolean = false;
   protected rootTypes: RootType[] = ['query', 'mutation', 'fragment'];
   protected fieldName?: string;
   protected matchConditions?: matchCondition[];
 
-  constructor({ fieldName, rootTypes, matchConditions }: RewriterOpts) {
+  constructor({
+    fieldName,
+    rootTypes,
+    matchConditions,
+    includeNonFieldPathsInMatch = false
+  }: RewriterOpts) {
     this.fieldName = fieldName;
     this.matchConditions = matchConditions;
+    this.includeNonFieldPathsInMatch = includeNonFieldPathsInMatch;
     if (!this.fieldName && !this.matchConditions) {
       throw new Error(
         'Neither a fieldName or matchConditions were provided. Please choose to pass either one in order to be able to detect which fields to rewrite.'
@@ -74,7 +82,12 @@ abstract class Rewriter {
    * Receives the parent object of the matched field with the key of the matched field.
    * For arrays, the index of the element is also present.
    */
-  public rewriteResponse(response: any, key: string, index?: number): any {
+  public rewriteResponse(
+    response: any,
+    key: string,
+    index?: number,
+    nodeMatchAndParents?: ASTNode[]
+  ): any {
     return response;
   }
 
@@ -91,7 +104,11 @@ abstract class Rewriter {
 
     // Extract the position
     if (Array.isArray(element)) {
-      element = element[index!] || null;
+      // if element is an empty array do not try to get
+      // one of its array elements
+      if (element.length !== 0) {
+        element = element[index!] || null;
+      }
     }
 
     return element;

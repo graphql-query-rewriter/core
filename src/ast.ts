@@ -1,4 +1,11 @@
-import { ASTNode, DocumentNode, FragmentDefinitionNode, VariableDefinitionNode } from 'graphql';
+import {
+  ArgumentNode,
+  ASTNode,
+  DocumentNode,
+  FragmentDefinitionNode,
+  Kind,
+  VariableDefinitionNode
+} from 'graphql';
 import { pushToArrayAtKey } from './utils';
 
 const ignoreKeys = new Set(['loc']);
@@ -239,17 +246,49 @@ export const replaceVariableDefinitions = (
 };
 
 /**
- * return the path that will be returned in the response from from the chain of parents
+ * Return the path that will be returned in the response from the chain of parents.
+ * By default this will only build up paths for field nodes, but the anyKind flag allows
+ * to build paths for any named node.
+ *
+ * It also supports aliases.
  */
 /** @hidden */
-export const extractPath = (parents: ReadonlyArray<ASTNode>): ReadonlyArray<string> => {
+export const extractPath = (
+  parents: ReadonlyArray<ASTNode>,
+  anyKind?: boolean
+): ReadonlyArray<string> => {
   const path: string[] = [];
-  parents.forEach(parent => {
-    if (parent.kind === 'Field') {
-      path.push(parent.name.value);
+  parents.forEach((parent: any) => {
+    if (parent.kind === 'Field' || anyKind) {
+      if (parent.alias) {
+        path.push(parent.alias.value);
+      } else if (parent.name) {
+        path.push(parent.name.value);
+      }
     }
   });
   return path;
+};
+
+/**
+ * return an ArgumentNode with a VariableNode as its value node with matching name.
+ */
+/** @hidden */
+export const astArgVarNode = (argName: string): ArgumentNode => {
+  return {
+    kind: Kind.ARGUMENT,
+    name: {
+      kind: Kind.NAME,
+      value: argName
+    },
+    value: {
+      kind: Kind.VARIABLE,
+      name: {
+        kind: Kind.NAME,
+        value: argName
+      }
+    }
+  };
 };
 
 /** @hidden */
@@ -261,13 +300,20 @@ interface ResultObj {
 export const rewriteResultsAtPath = (
   results: ResultObj,
   path: ReadonlyArray<string>,
-  callback: (parentResult: any, key: string, position?: number) => any
+  callback: (parentResult: any, key: string, position?: number) => any,
+  includesNonFieldPaths?: boolean
 ): ResultObj => {
   if (path.length === 0) return results;
 
   const curPathElm = path[0];
   const newResults = { ...results };
   const curResults = results[curPathElm];
+
+  // if results[curPathElm] is an empty array, call the callback response rewriter
+  // because there's nothing left to do.
+  if (Array.isArray(curResults) && curResults.length === 0) {
+    callback(results, curPathElm);
+  }
 
   if (path.length === 1) {
     if (Array.isArray(curResults)) {
@@ -281,15 +327,30 @@ export const rewriteResultsAtPath = (
   }
 
   const remainingPath = path.slice(1);
+
+  // If curResults is undefined, and includesNonFieldPaths is true,
+  // then curResults is not a field path, so call the callback to allow rewrites
+  // for non-field paths.
+  if (remainingPath.length && includesNonFieldPaths && curResults === undefined) {
+    callback(results, curPathElm);
+    // Then just continue with the next path
+    return rewriteResultsAtPath(results, remainingPath, callback, includesNonFieldPaths);
+  }
+
   // if the path stops here, just return results without any rewriting
   if (curResults === undefined || curResults === null) return results;
 
   if (Array.isArray(curResults)) {
     newResults[curPathElm] = curResults.map(result =>
-      rewriteResultsAtPath(result, remainingPath, callback)
+      rewriteResultsAtPath(result, remainingPath, callback, includesNonFieldPaths)
     );
   } else {
-    newResults[curPathElm] = rewriteResultsAtPath(curResults, remainingPath, callback);
+    newResults[curPathElm] = rewriteResultsAtPath(
+      curResults,
+      remainingPath,
+      callback,
+      includesNonFieldPaths
+    );
   }
 
   return newResults;

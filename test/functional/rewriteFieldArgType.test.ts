@@ -186,7 +186,6 @@ describe('Rewrite field arg type', () => {
         newType: 'Int!'
       });
     } catch (error) {
-      console.log(error.message);
       expect(
         error.message.includes('Neither a fieldName or matchConditions were provided')
       ).toEqual(true);
