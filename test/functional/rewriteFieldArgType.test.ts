@@ -275,4 +275,90 @@ describe('Rewrite field arg type', () => {
       }
     });
   });
+
+  it('recognizes and considers object path in nested objects', () => {
+    const handler = new RewriteHandler([
+      new FieldArgTypeRewriter({
+        fieldName: 'things',
+        argName: 'input',
+        objectPath: ['identifier', 'level_2', 'level_3'],
+        oldType: 'String!',
+        newType: 'Int!',
+      })
+    ]);
+
+    const query = gqlFmt`
+      mutation doTheThings($arg1: String!, $arg2: Int!, $arg3: String!) {
+        things(input: {identifier: {level_2: {level_3: $arg1}}, otherArg: $arg2}) {
+          cat
+          dog {
+            catdog
+          }
+        }
+        otherThing(arg3: $arg3) {
+          otherThingField
+        }
+      }
+    `;
+    const expectedRewritenQuery = gqlFmt`
+      mutation doTheThings($arg1: Int!, $arg2: Int!, $arg3: String!) {
+        things(input: {identifier: {level_2: {level_3: $arg1}}, otherArg: $arg2}) {
+          cat
+          dog {
+            catdog
+          }
+        }
+        otherThing(arg3: $arg3) {
+          otherThingField
+        }
+      }
+    `;
+    expect(handler.rewriteRequest(query)).toEqual({
+      query: expectedRewritenQuery,
+      variables: undefined
+    });
+  });
+
+  it('recognizes and considers single key path in an object', () => {
+    const handler = new RewriteHandler([
+      new FieldArgTypeRewriter({
+        fieldName: 'things',
+        argName: 'input',
+        objectPath: ['identifier'],
+        oldType: 'String!',
+        newType: 'Int!',
+      })
+    ]);
+
+    const query = gqlFmt`
+      mutation doTheThings($arg1: String!, $arg2: Int!, $arg3: String!) {
+        things(input: {identifier: $arg1, otherArg: $arg2}) {
+          cat
+          dog {
+            catdog
+          }
+        }
+        otherThing(arg3: $arg3) {
+          otherThingField
+        }
+      }
+    `;
+    const expectedRewritenQuery = gqlFmt`
+      mutation doTheThings($arg1: Int!, $arg2: Int!, $arg3: String!) {
+        things(input: {identifier: $arg1, otherArg: $arg2}) {
+          cat
+          dog {
+            catdog
+          }
+        }
+        otherThing(arg3: $arg3) {
+          otherThingField
+        }
+      }
+    `;
+    expect(handler.rewriteRequest(query)).toEqual({
+      query: expectedRewritenQuery,
+      variables: undefined
+    });
+  });
 });

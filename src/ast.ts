@@ -1,4 +1,10 @@
-import { ASTNode, DocumentNode, FragmentDefinitionNode, VariableDefinitionNode } from 'graphql';
+import {
+  ASTNode,
+  DocumentNode,
+  FragmentDefinitionNode, Kind,
+  ObjectValueNode, ValueNode,
+  VariableDefinitionNode
+} from 'graphql';
 import { pushToArrayAtKey } from './utils';
 
 const ignoreKeys = new Set(['loc']);
@@ -294,3 +300,24 @@ export const rewriteResultsAtPath = (
 
   return newResults;
 };
+
+export const getByPath = (node: ObjectValueNode, path: ReadonlyArray<string>): ValueNode | undefined => {
+  const [firstSegment, ...theRestOfSegments] = path;
+
+  if (!firstSegment) return undefined;
+
+  const theField = node.fields
+    .find(field => field.name.value === firstSegment);
+
+  if (!theField) return undefined;
+
+  if (theRestOfSegments.length === 0) {
+    return theField.value;
+  }
+
+  if (theField.value.kind === Kind.OBJECT) {
+    return getByPath(theField.value, theRestOfSegments)
+  }
+
+  return undefined;
+}

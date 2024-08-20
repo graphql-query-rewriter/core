@@ -7,15 +7,15 @@ import {
   parseType,
   TypeNode,
   ValueNode,
-  VariableNode
 } from 'graphql';
 import Maybe from 'graphql/tsutils/Maybe';
-import { NodeAndVarDefs, nodesMatch } from '../ast';
+import { getByPath, NodeAndVarDefs, nodesMatch } from '../ast';
 import { identifyFunc } from '../utils';
 import Rewriter, { RewriterOpts, Variables } from './Rewriter';
 
 interface FieldArgTypeRewriterOpts extends RewriterOpts {
   argName: string;
+  objectPath?: ReadonlyArray<string>;
   oldType: string;
   newType: string;
   coerceVariable?: (variable: any, context: { variables: Variables; args: ArgumentNode[] }) => any;
@@ -37,6 +37,7 @@ interface FieldArgTypeRewriterOpts extends RewriterOpts {
  */
 class FieldArgTypeRewriter extends Rewriter {
   protected argName: string;
+  protected objectPath: ReadonlyArray<string>;
   protected oldTypeNode: TypeNode;
   protected newTypeNode: TypeNode;
   // Passes context with rest of arguments and variables.
@@ -56,6 +57,7 @@ class FieldArgTypeRewriter extends Rewriter {
   constructor(options: FieldArgTypeRewriterOpts) {
     super(options);
     this.argName = options.argName;
+    this.objectPath = options.objectPath || [];
     this.oldTypeNode = parseType(options.oldType);
     this.newTypeNode = parseType(options.newType);
     this.coerceVariable = options.coerceVariable || identifyFunc;
@@ -154,8 +156,17 @@ class FieldArgTypeRewriter extends Rewriter {
     const matchingArgument = (node.arguments || []).find(
       arg => arg.name.value === this.argName
     ) as ArgumentNode;
-    const variableNode = matchingArgument.value as VariableNode;
-    return variableNode.kind === Kind.VARIABLE && variableNode.name.value;
+
+    const valueNode =
+      this.objectPath && matchingArgument.value.kind === Kind.OBJECT
+        ? getByPath(matchingArgument.value, this.objectPath)
+        : matchingArgument.value;
+
+    if (!valueNode) {
+      return false;
+    }
+
+    return valueNode.kind === Kind.VARIABLE && valueNode.name.value;
   }
 }
 
